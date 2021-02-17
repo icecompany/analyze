@@ -10,10 +10,9 @@ window.onload = () => {
         })
         .then((response) => {
             let data = response.data;
-            addProjects(data);
-            addGlobalSquare(data);
-            //addGlobalData(data);
-            //addSquareTypesData(data);
+            addProjects(data.summary);
+            addGlobalSquare(data.summary, "#global-square-types");
+            addGlobalSquare(data.floor, "#floor-square-types");
         });
 }
 
@@ -70,8 +69,33 @@ let addProjects = (data) => {
     }
 }
 
-let addGlobalSquare = (data) => {
-    let tbody = document.querySelector("#global-square-types");
+let addGlobalSquare = (data, selector) => {
+    let tbody = document.querySelector(selector);
+    for (let typeID in data.types) {
+        let tr = document.createElement('tr');
+        let td = document.createElement('td');
+        td.innerText = data.types[typeID];
+        tr.appendChild(td);
+        for (let projectID in data.projects) {
+            for (let what of ['square', 'money']) {
+                let td = document.createElement('td');
+                try {
+                    td.innerText = data.data[typeID][projectID][what];
+                }
+                catch (e) {
+                    td.innerText = '-';
+                }
+                finally {
+                    tr.appendChild(td);
+                }
+            }
+        }
+        tbody.appendChild(tr);
+    }
+}
+
+let add2thFloorSquare = (data) => {
+    let tbody = document.querySelector("#floor-square-types");
     for (let typeID in data.types) {
         let tr = document.createElement('tr');
         let td = document.createElement('td');
