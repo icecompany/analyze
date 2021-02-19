@@ -19,6 +19,17 @@ window.onload = () => {
             addSquare(data.squares, "#street-types", 'street');
             addTotal(data.squares, "#street-total", 'street');
         });
+
+    let url_more = "more.json";
+    fetch(url_more)
+        .then((response) => {
+            return response.json();
+        })
+        .then((response) => {
+            let data = response.data;
+            addMore(data, "#more-companies");
+            addTotal(data, "#more-total");
+        });
 }
 
 let addProjects = (data) => {
@@ -65,3 +76,31 @@ let addSquare = (data, selector, square_type = false) => {
         tbody.appendChild(tr);
     }
 }
+
+let addMore = (data, selector) => {
+    let tbody = document.querySelector(selector);
+    for (let company in data.companies) {
+        let tr = document.createElement('tr');
+        let td = document.createElement('td');
+        let a = document.createElement('a');
+        a.href = `https://port.icecompany.org/administrator/index.php?option=com_companies&view=company&layout=edit&id=${company}`;
+        a.text = data.companies[company];
+        a.target = '_blank';
+        td.appendChild(a);
+        tr.appendChild(td);
+        for (let projectID in data.projects) {
+            for (let what of ['square', 'money']) {
+                let td = document.createElement('td');
+                try {
+                    td.innerText = data.data[company][projectID][what];
+                } catch (e) {
+                    td.innerText = '-';
+                } finally {
+                    tr.appendChild(td);
+                }
+            }
+        }
+        tbody.appendChild(tr);
+    }
+}
+
