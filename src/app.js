@@ -39,6 +39,7 @@ let loadData = () => {
         })
         .then((response) => {
             let data = response.data;
+            document.querySelector("#more-companies").innerHTML = "";
             addProjects(data.summary);
             addSquare(data.summary, "#global-square-types");
             addTotal(data.summary, "#summary-total");
