@@ -5,7 +5,45 @@
     <title>Analyze</title>
 </head>
 <body>
-<div class="container-fluid"><h1>Анализ продаж</h1></div>
+<div class="container-fluid"><h1>Анализ продаж. <span id="project-title"></span></h1></div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-3">
+            <select class="form-select" id="select-family">
+                <option selected>Семейство проектов</option>
+                <option value="1">Армия</option>
+                <option value="2">Комплексная безопасность</option>
+            </select>
+        </div>
+        <div class="col-9" id="all-projects">
+            <div data-id="1" class="select-project form-check-inline">
+                <div class="form-check form-switch form-check-inline">
+                    <input class="form-check-input" type="checkbox" data-family="1" data-id="5" id="army-2019">
+                    <label class="form-check-label" for="army-2019">Армия-2019</label>
+                </div>
+                <div class="form-check form-switch form-check-inline">
+                    <input class="form-check-input" type="checkbox" checked data-family="1" data-id="11" id="army-2020">
+                    <label class="form-check-label" for="army-2020">Армия-2020</label>
+                </div>
+                <div class="form-check form-switch form-check-inline">
+                    <input class="form-check-input" type="checkbox" checked data-family="1" data-id="12" id="army-2021">
+                    <label class="form-check-label" for="army-2021">Армия-2021</label>
+                </div>
+            </div>
+            <div data-id="2" class="select-project form-check-inline">
+                <div class="form-check form-switch form-check-inline">
+                    <input class="form-check-input" type="checkbox" checked data-family="2" data-id="6" id="kb-2019">
+                    <label class="form-check-label" for="kb-2019">КБ-2019</label>
+                </div>
+                <div class="form-check form-switch form-check-inline">
+                    <input class="form-check-input" type="checkbox" checked data-family="2" data-id="30" id="kb-2021">
+                    <label class="form-check-label" for="kb-2021">КБ-2021</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<br>
 <div class="container-fluid">
     <div class="accordion" id="accordionExample">
         <div class="accordion-item">
