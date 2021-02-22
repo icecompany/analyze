@@ -6,124 +6,125 @@
 </head>
 <body>
 <div class="container-fluid"><h1>Анализ продаж. <span id="project-title"></span></h1></div>
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-3">
-            <select class="form-select" id="select-family">
-                <option selected>Семейство проектов</option>
-                <option value="1">Армия</option>
-                <option value="2">Комплексная безопасность</option>
-            </select>
-        </div>
-        <div class="col-9" id="all-projects">
-            <div data-id="1" class="select-project form-check-inline">
-                <div class="form-check form-switch form-check-inline">
-                    <input class="form-check-input" type="checkbox" data-family="1" data-id="5" id="army-2019">
-                    <label class="form-check-label" for="army-2019">Армия-2019</label>
-                </div>
-                <div class="form-check form-switch form-check-inline">
-                    <input class="form-check-input" type="checkbox" checked data-family="1" data-id="11" id="army-2020">
-                    <label class="form-check-label" for="army-2020">Армия-2020</label>
-                </div>
-                <div class="form-check form-switch form-check-inline">
-                    <input class="form-check-input" type="checkbox" checked data-family="1" data-id="12" id="army-2021">
-                    <label class="form-check-label" for="army-2021">Армия-2021</label>
-                </div>
+<div class="container-fluid" id="need_auth">
+    <div class="alert alert-warning">
+        Необходима авторизация в системе. Нажмите <a href="/administrator/index.php?option=com_contracts&amp;view=contracts" target="_blank">здесь</a> для входа в систему и после этого перезагрузите эту страницу.
+    </div>
+</div>
+<div class="container-fluid" id="app">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-3" id="families">
+
             </div>
-            <div data-id="2" class="select-project form-check-inline">
-                <div class="form-check form-switch form-check-inline">
-                    <input class="form-check-input" type="checkbox" checked data-family="2" data-id="6" id="kb-2019">
-                    <label class="form-check-label" for="kb-2019">КБ-2019</label>
+            <div class="col-9" id="all-projects">
+                <div data-id="1" class="select-project form-check-inline">
+                    <div class="form-check form-switch form-check-inline">
+                        <input class="form-check-input" type="checkbox" data-family="1" data-id="5" id="army-2019">
+                        <label class="form-check-label" for="army-2019">Армия-2019</label>
+                    </div>
+                    <div class="form-check form-switch form-check-inline">
+                        <input class="form-check-input" type="checkbox" checked data-family="1" data-id="11" id="army-2020">
+                        <label class="form-check-label" for="army-2020">Армия-2020</label>
+                    </div>
+                    <div class="form-check form-switch form-check-inline">
+                        <input class="form-check-input" type="checkbox" checked data-family="1" data-id="12" id="army-2021">
+                        <label class="form-check-label" for="army-2021">Армия-2021</label>
+                    </div>
                 </div>
-                <div class="form-check form-switch form-check-inline">
-                    <input class="form-check-input" type="checkbox" checked data-family="2" data-id="30" id="kb-2021">
-                    <label class="form-check-label" for="kb-2021">КБ-2021</label>
+                <div data-id="2" class="select-project form-check-inline">
+                    <div class="form-check form-switch form-check-inline">
+                        <input class="form-check-input" type="checkbox" checked data-family="2" data-id="6" id="kb-2019">
+                        <label class="form-check-label" for="kb-2019">КБ-2019</label>
+                    </div>
+                    <div class="form-check form-switch form-check-inline">
+                        <input class="form-check-input" type="checkbox" checked data-family="2" data-id="30" id="kb-2021">
+                        <label class="form-check-label" for="kb-2021">КБ-2021</label>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<br>
-<div class="container-fluid">
-    <div class="accordion" id="accordionExample">
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingOne">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-global" aria-expanded="true" aria-controls="collapse-global">
-                    Суммарная таблица
-                </button>
-            </h2>
-            <div id="collapse-global" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-                <div class="accordion-body">
-                    <table class="table table-hover" id="global-table">
-                        <thead><tr class="projects-head" id="global-head"><th>Площадь</th></tr></thead>
-                        <tbody id="global-square-types"></tbody>
-                        <tfoot><tr id="summary-total"><th>Итого</th></tr></tfoot>
-                    </table>
+    <br>
+    <div class="container-fluid">
+        <div class="accordion" id="accordionExample">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-global" aria-expanded="true" aria-controls="collapse-global">
+                        Суммарная таблица
+                    </button>
+                </h2>
+                <div id="collapse-global" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                    <div class="accordion-body" id="table-summary">Выберите семейство проектов</div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingPavilion">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePavilion" aria-expanded="false" aria-controls="collapseTwo">
+                        Павильон
+                    </button>
+                </h2>
+                <div id="collapsePavilion" class="accordion-collapse collapse" aria-labelledby="headingPavilion" data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                        <table class="table table-hover" id="pavilion-table">
+                            <thead><tr class="projects-head" id="pavilion-head"><th>Площадь</th></tr></thead>
+                            <tbody id="pavilion-types"></tbody>
+                            <tfoot><tr id="pavilion-total"><th>Итого</th></tr></tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingStreet">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStreet" aria-expanded="false" aria-controls="collapseStreet">
+                        Улица
+                    </button>
+                </h2>
+                <div id="collapseStreet" class="accordion-collapse collapse" aria-labelledby="headingStreet" data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                        <table class="table table-hover" id="street-table">
+                            <thead><tr class="projects-head" id="street-head"><th>Площадь</th></tr></thead>
+                            <tbody id="street-types"></tbody>
+                            <tfoot><tr id="street-total"><th>Итого</th></tr></tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading2th_floor">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2th_floor" aria-expanded="false" aria-controls="collapse2th_floor">
+                        Второй этаж
+                    </button>
+                </h2>
+                <div id="collapse2th_floor" class="accordion-collapse collapse" aria-labelledby="heading2th_floor" data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                        <table class="table table-hover" id="2th_floor-table">
+                            <thead><tr class="projects-head" id="2th_floor-head"><th>Площадь</th></tr></thead>
+                            <tbody id="floor-square-types"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingMore">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMore" aria-expanded="false" aria-controls="collapseMore">
+                        Подробнее
+                    </button>
+                </h2>
+                <div id="collapseMore" class="accordion-collapse collapse" aria-labelledby="headingMore" data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                        <table class="table table-hover" id="More-table">
+                            <thead><tr class="projects-head" id="More-head"><th>Площадь</th></tr></thead>
+                            <tbody id="more-companies"></tbody>
+                            <tfoot><tr id="more-total"><th>Итого</th></tr></tfoot>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingPavilion">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePavilion" aria-expanded="false" aria-controls="collapseTwo">
-                    Павильон
-                </button>
-            </h2>
-            <div id="collapsePavilion" class="accordion-collapse collapse" aria-labelledby="headingPavilion" data-bs-parent="#accordionExample">
-                <div class="accordion-body">
-                    <table class="table table-hover" id="pavilion-table">
-                        <thead><tr class="projects-head" id="pavilion-head"><th>Площадь</th></tr></thead>
-                        <tbody id="pavilion-types"></tbody>
-                        <tfoot><tr id="pavilion-total"><th>Итого</th></tr></tfoot>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingStreet">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStreet" aria-expanded="false" aria-controls="collapseStreet">
-                    Улица
-                </button>
-            </h2>
-            <div id="collapseStreet" class="accordion-collapse collapse" aria-labelledby="headingStreet" data-bs-parent="#accordionExample">
-                <div class="accordion-body">
-                    <table class="table table-hover" id="street-table">
-                        <thead><tr class="projects-head" id="street-head"><th>Площадь</th></tr></thead>
-                        <tbody id="street-types"></tbody>
-                        <tfoot><tr id="street-total"><th>Итого</th></tr></tfoot>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="heading2th_floor">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2th_floor" aria-expanded="false" aria-controls="collapse2th_floor">
-                    Второй этаж
-                </button>
-            </h2>
-            <div id="collapse2th_floor" class="accordion-collapse collapse" aria-labelledby="heading2th_floor" data-bs-parent="#accordionExample">
-                <div class="accordion-body">
-                    <table class="table table-hover" id="2th_floor-table">
-                        <thead><tr class="projects-head" id="2th_floor-head"><th>Площадь</th></tr></thead>
-                        <tbody id="floor-square-types"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingMore">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMore" aria-expanded="false" aria-controls="collapseMore">
-                    Подробнее
-                </button>
-            </h2>
-            <div id="collapseMore" class="accordion-collapse collapse" aria-labelledby="headingMore" data-bs-parent="#accordionExample">
-                <div class="accordion-body">
-                    <table class="table table-hover" id="More-table">
-                        <thead><tr class="projects-head" id="More-head"><th>Площадь</th></tr></thead>
-                        <tbody id="more-companies"></tbody>
-                        <tfoot><tr id="more-total"><th>Итого</th></tr></tfoot>
-                    </table>
-                </div>
-            </div>
+        <br>
+        <div class="container-fluid" id="test">
+
         </div>
     </div>
 </div>

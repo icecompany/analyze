@@ -1,14 +1,99 @@
 'use strict';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+class Summary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            children: this.props.data
+        }
+    }
+
+    render() {
+        let heads = Object.keys(this.props.projects).map((id, i) => {
+            return (
+                <th key={i} colSpan={2}>{this.props.projects[id]}</th>
+            )
+        });
+        let data = Object.keys(this.props.types).map((type_id, i) => {
+            return (
+                <tr key={i}>
+                    <td>{this.props.types[type_id]}</td>
+                    {Object.keys(this.props.projects).map((projectID, j) => {
+                        return (<td key={j}>{this.props.data[type_id][projectID].square}</td>)
+                    })}
+                    {Object.keys(this.props.projects).map((projectID, j) => {
+                        return (<td key={j}>{this.props.data[type_id][projectID].money}</td>)
+                    })}
+                </tr>
+            )
+        });
+        let total = Object.keys(this.props.projects).map((projectID, i) => {
+            return (
+                Object.keys(this.props.total[projectID]).map((type, j) => {
+                    return (<th key={j}>{this.props.total[projectID][type]}</th>)
+                })
+            )
+        });
+        return (
+            <table className="table table-hover">
+                <thead>
+                    <tr><th>Площадь</th>{heads}</tr>
+                </thead>
+                <tbody>{data}</tbody>
+                <tfoot>
+                    <tr>
+                        <th>Итого</th>
+                        {total}
+                    </tr>
+                </tfoot>
+            </table>
+        )
+    }
+}
+
+class Families extends React.Component {
+    render() {
+        return (
+            <select className="form-select" id="select-family" defaultValue="">
+                <option value="">Семейство проектов</option>
+                <option value="1">Армия</option>
+                <option value="2">Комплексная безопасность</option>
+            </select>
+        )
+    }
+}
 
 let all_projects = document.querySelector("#all-projects");
+let app = document.querySelector("#app");
+let need_auth = document.querySelector("#need_auth");
 let projects = document.querySelectorAll(".select-project input[type='checkbox']");
 
 window.onload = () => {
+    ReactDOM.render(<Families />, document.querySelector("#families"));
     all_projects.style.display = 'none';
+    checkAuth();
     document.querySelector("#select-family").addEventListener('change', loadData, false);
     for (let project of projects) project.addEventListener('change', loadData, false);
+}
+
+let checkAuth = () => {
+    let url = "/administrator/index.php?option=com_janalyze&task=summary.execute&familyID=1&format=json";
+    fetch(url)
+        .then((response) => {
+            if (response.status !== 403) {
+                need_auth.style.display = 'none';
+            }
+            else {
+                app.style.display = 'none';
+            }
+        })
+        .catch((error) => {
+            app.style.display = 'none';
+        })
 }
 
 let loadMore = (square_type, commercial) => {
@@ -35,19 +120,24 @@ let loadData = () => {
     let url = getURISummary(familyID);
     fetch(url)
         .then((response) => {
-            return response.json();
+            if (!response.ok) console.log(`Code: ${response.status}`);
+            else return response.json();
         })
         .then((response) => {
             let data = response.data;
+            ReactDOM.render(<Summary projects={data.summary.projects} types={data.summary.types} data={data.summary.data} total={data.summary.total} />, document.querySelector("#table-summary"));
             document.querySelector("#more-companies").innerHTML = "";
             addProjects(data.summary);
-            addSquare(data.summary, "#global-square-types");
-            addTotal(data.summary, "#summary-total");
             addSquare(data.floor, "#floor-square-types");
             addSquare(data.squares, "#pavilion-types", 'pavilion');
             addTotal(data.squares, "#pavilion-total", 'pavilion');
             addSquare(data.squares, "#street-types", 'street');
             addTotal(data.squares, "#street-total", 'street');
+        }, (error) => {
+
+        })
+        .catch((response) => {
+            console.log(`Получена ошибка: ${response}.`);
         });
 }
 
