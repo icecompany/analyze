@@ -22,11 +22,10 @@ class Summary extends React.Component {
             return (
                 <tr key={i}>
                     <td>{this.props.types[type_id]}</td>
-                    {Object.keys(this.props.projects).map((projectID, j) => {
-                        return (<td key={j}>{this.props.data[type_id][projectID].square}</td>)
-                    })}
-                    {Object.keys(this.props.projects).map((projectID, j) => {
-                        return (<td key={j}>{this.props.data[type_id][projectID].money}</td>)
+                    {Object.keys(this.props.data[type_id]).map((projectID, j) => {
+                        return ['square', 'money'].map((what, k) => {
+                            return (<td key={k}>{this.props.data[type_id][projectID][what]}</td>);
+                        })
                     })}
                 </tr>
             )
@@ -81,7 +80,7 @@ window.onload = () => {
 }
 
 let checkAuth = () => {
-    let url = "/administrator/index.php?option=com_janalyze&task=summary.execute&familyID=1&format=json";
+    const url = "/administrator/index.php?option=com_janalyze&task=summary.execute&familyID=1&format=json";
     fetch(url)
         .then((response) => {
             if (response.status !== 403) {
@@ -126,13 +125,10 @@ let loadData = () => {
         .then((response) => {
             let data = response.data;
             ReactDOM.render(<Summary projects={data.summary.projects} types={data.summary.types} data={data.summary.data} total={data.summary.total} />, document.querySelector("#table-summary"));
+            ReactDOM.render(<Summary projects={data.squares.projects} types={data.squares.types.pavilion} data={data.squares.data.pavilion} total={data.squares.total.pavilion} />, document.querySelector("#table-pavilion"));
+            ReactDOM.render(<Summary projects={data.squares.projects} types={data.squares.types.street} data={data.squares.data.street} total={data.squares.total.street} />, document.querySelector("#table-street"));
+            ReactDOM.render(<Summary projects={data.squares.projects} types={data.floor.types} data={data.floor.data} total={data.floor.total} />, document.querySelector("#table-floor"));
             document.querySelector("#more-companies").innerHTML = "";
-            addProjects(data.summary);
-            addSquare(data.floor, "#floor-square-types");
-            addSquare(data.squares, "#pavilion-types", 'pavilion');
-            addTotal(data.squares, "#pavilion-total", 'pavilion');
-            addSquare(data.squares, "#street-types", 'street');
-            addTotal(data.squares, "#street-total", 'street');
         }, (error) => {
 
         })
