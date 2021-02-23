@@ -47,11 +47,20 @@ class Summary extends React.Component {
 
     render() {
         let heads = Object.keys(this.props.projects).map((id, i) => {
-            return ['square', 'money'].map((what, j) => {
-                return (
-                    <th key={j} style={{cursor: "pointer"}} data-sort-method='number'>{this.props.projects[id]}</th>
-                )
-            })
+            if (i !== 0) {
+                return ['square', 'percent_square', 'money', 'percent_money'].map((what, j) => {
+                    return (
+                        <th key={j} style={{cursor: "pointer"}} data-sort-method='number'>{this.props.projects[id]}</th>
+                    )
+                })
+            }
+            else {
+                return ['square', 'money'].map((what, j) => {
+                    return (
+                        <th key={j} style={{cursor: "pointer"}} data-sort-method='number'>{this.props.projects[id]}</th>
+                    )
+                })
+            }
         });
         let data = Object.keys(this.props.types).map((type_id, i) => {
             return (this.props.type !== 'squares') ? (
@@ -60,9 +69,18 @@ class Summary extends React.Component {
                         {this.props.types[type_id]}
                     </td>
                     {Object.keys(this.props.data[type_id]).map((projectID, j) => {
-                        return ['square', 'money'].map((what, k) => {
-                            return (<td key={k} data-sort={this.props.data[type_id][projectID][`${what}_clean`]}>{this.props.data[type_id][projectID][what]}</td>);
-                        })
+                        if (j !== 0) {
+                            return ['square', 'percent_square', 'money', 'percent_money'].map((what, k) => {
+                                return (<td key={k}
+                                            data-sort={this.props.data[type_id][projectID][`${what}_clean`]}>{this.props.data[type_id][projectID][what]}</td>);
+                            })
+                        }
+                        else {
+                            return ['square', 'money'].map((what, k) => {
+                                return (<td key={k}
+                                            data-sort={this.props.data[type_id][projectID][`${what}_clean`]}>{this.props.data[type_id][projectID][what]}</td>);
+                            })
+                        }
                     })}
                 </tr>
             ) : (
@@ -71,9 +89,16 @@ class Summary extends React.Component {
                         <More title={this.props.types[type_id]} square_type={type_id} commercial="commercial" />
                     </td>
                     {Object.keys(this.props.data[type_id]).map((projectID, j) => {
-                        return ['square', 'money'].map((what, k) => {
-                            return (<td key={k}>{this.props.data[type_id][projectID][what]}</td>);
-                        })
+                        if (j !== 0) {
+                            return ['square', 'percent_square', 'money', 'percent_money'].map((what, k) => {
+                                return (<td key={k}>{this.props.data[type_id][projectID][what]}</td>);
+                            })
+                        }
+                        else {
+                            return ['square', 'money'].map((what, k) => {
+                                return (<td key={k}>{this.props.data[type_id][projectID][what]}</td>);
+                            })
+                        }
                     })}
                 </tr>
             )
@@ -86,7 +111,7 @@ class Summary extends React.Component {
             )
         });
         return (
-            <table className="table table-hover" id={`selector-${this.props.selector}`}>
+            <table className="table table-bordered table-hover" id={`selector-${this.props.selector}`}>
                 <thead>
                     <tr>
                         <th>{this.props.title}</th>
