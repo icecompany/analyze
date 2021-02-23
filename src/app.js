@@ -1,6 +1,9 @@
 'use strict';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+//import Tablesort from 'tablesort';
+window.Tablesort = require('tablesort');
+require('tablesort/src/sorts/tablesort.number');
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -38,54 +41,16 @@ class Summary extends React.Component {
     }
 
     componentDidMount() {
-        let ths = document.querySelectorAll(`#selector-${this.props.selector} thead th`);
-        for (let n = 0; n < ths.length; n++) {
-            ths[n].addEventListener('click', () => {
-                let table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-                table = document.querySelector(`#selector-${this.props.selector}`);
-                switching = true;
-                dir = "asc";
-                while (switching) {
-                    switching = false;
-                    rows = table.getElementsByTagName("TR");
-                    for (i = 1; i < (rows.length - 1); i++) {
-                        shouldSwitch = false;
-                        x = rows[i].getElementsByTagName("TD")[n];
-                        y = rows[i + 1].getElementsByTagName("TD")[n];
-                        if (x !== undefined && y !== undefined) {
-                            if (dir === "asc") {
-                                if (parseFloat(x.innerText.toLowerCase().replaceAll(' ', '').replaceAll(',', '.')) > parseFloat(y.innerText.toLowerCase().replaceAll(' ', '').replaceAll(',', '.'))) {
-                                    shouldSwitch = true;
-                                    break;
-                                }
-                            } else if (dir === "desc") {
-                                if (parseFloat(x.innerText.toLowerCase().replaceAll(' ', '').replaceAll(',', '.')) < parseFloat(y.innerText.toLowerCase().replaceAll(' ', '').replaceAll(',', '.'))) {
-                                    shouldSwitch = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    if (shouldSwitch) {
-                        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                        switching = true;
-                        switchcount ++;
-                    } else {
-                        if (switchcount === 0 && dir === "asc") {
-                            dir = "desc";
-                            switching = true;
-                        }
-                    }
-                }
-            });
-        }
+        let sort = new Tablesort(document.querySelector(`#selector-${this.props.selector}`));
+        sort.refresh();
     }
-
 
     render() {
         let heads = Object.keys(this.props.projects).map((id, i) => {
             return ['square', 'money'].map((what, j) => {
-                return (<th key={j}>{this.props.projects[id]}</th>)
+                return (
+                    <th key={j} style={{cursor: "pointer"}} data-sort-method='number'>{this.props.projects[id]}</th>
+                )
             })
         });
         let data = Object.keys(this.props.types).map((type_id, i) => {
@@ -96,7 +61,7 @@ class Summary extends React.Component {
                     </td>
                     {Object.keys(this.props.data[type_id]).map((projectID, j) => {
                         return ['square', 'money'].map((what, k) => {
-                            return (<td key={k}>{this.props.data[type_id][projectID][what]}</td>);
+                            return (<td key={k} data-sort={this.props.data[type_id][projectID][`${what}_clean`]}>{this.props.data[type_id][projectID][what]}</td>);
                         })
                     })}
                 </tr>
