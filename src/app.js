@@ -4,12 +4,37 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+class More extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    load(e) {
+        e.preventDefault();
+        let familyID = document.querySelector("#select-family").value;
+        if (isNaN(parseInt(familyID))) return;
+        let url = getURITypes(familyID, e.target.dataset.square, e.target.dataset.commercial);
+        fetch(url)
+            .then((response) => {
+                return response.json();
+            })
+            .then((response) => {
+                let data = response.data;
+                ReactDOM.render(<Summary type="more" projects={data.projects} types={data.companies} data={data.data} total={data.total} />, document.querySelector("#table-more"));
+            });
+        return false;
+    }
+
+    render() {
+        return (
+            <a href="#" onClick={this.load} data-square={this.props.square_type} data-commercial={this.props.commercial}>{this.props.title}</a>
+        )
+    }
+}
+
 class Summary extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            children: this.props.data
-        }
     }
 
     render() {
@@ -19,9 +44,22 @@ class Summary extends React.Component {
             )
         });
         let data = Object.keys(this.props.types).map((type_id, i) => {
-            return (
+            return (this.props.type !== 'squares') ? (
                 <tr key={i}>
-                    <td>{this.props.types[type_id]}</td>
+                    <td>
+                        {this.props.types[type_id]}
+                    </td>
+                    {Object.keys(this.props.data[type_id]).map((projectID, j) => {
+                        return ['square', 'money'].map((what, k) => {
+                            return (<td key={k}>{this.props.data[type_id][projectID][what]}</td>);
+                        })
+                    })}
+                </tr>
+            ) : (
+                <tr key={i}>
+                    <td>
+                        <More title={this.props.types[type_id]} square_type={type_id} commercial="commercial" />
+                    </td>
                     {Object.keys(this.props.data[type_id]).map((projectID, j) => {
                         return ['square', 'money'].map((what, k) => {
                             return (<td key={k}>{this.props.data[type_id][projectID][what]}</td>);
@@ -40,7 +78,10 @@ class Summary extends React.Component {
         return (
             <table className="table table-hover">
                 <thead>
-                    <tr><th>Площадь</th>{heads}</tr>
+                    <tr>
+                        <th>Площадь</th>
+                        {heads}
+                    </tr>
                 </thead>
                 <tbody>{data}</tbody>
                 <tfoot>
@@ -62,6 +103,55 @@ class Families extends React.Component {
                 <option value="1">Армия</option>
                 <option value="2">Комплексная безопасность</option>
             </select>
+        )
+    }
+}
+
+class AccordionItem extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        return (
+            <div className="accordion-item">
+                <h4 className="accordion-header" id={`heading-${this.props.id}`}>
+                    <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target={`#collapse-${this.props.id}`} aria-expanded="false" aria-controls={`collapse-${this.props.id}`}>
+                        {this.props.title}
+                    </button>
+                </h4>
+                <div id={`collapse-${this.props.id}`} className="accordion-collapse collapse" aria-labelledby={`heading-${this.props.id}`}
+                     data-bs-parent={`#${this.props.accordion}`}>
+                    <div className="accordion-body table-result" id={`table-${this.props.id}`}>
+
+                    </div>
+                </div>
+            </div>
+        )
+    }
+}
+
+class Accordion extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        let items = {
+            "summary": "Суммарная таблица",
+            "pavilion": "В павильоне",
+            "street": "На улице",
+            "floor": "Второй этаж",
+            "more": "Подробнее"
+        };
+        let accordion_items = Object.keys(items).map((id, i) => {
+            return (<AccordionItem key={i} id={id} title={items[id]} accordion={this.props.id} />)
+        });
+        return (
+            <div className="accordion" id={this.props.id}>
+                {accordion_items}
+            </div>
         )
     }
 }
@@ -95,21 +185,6 @@ let checkAuth = () => {
         })
 }
 
-let loadMore = (square_type, commercial) => {
-    let familyID = document.querySelector("#select-family").value;
-    if (isNaN(parseInt(familyID))) return;
-    let url = getURITypes(familyID, square_type, commercial);
-    fetch(url)
-        .then((response) => {
-            return response.json();
-        })
-        .then((response) => {
-            let data = response.data;
-            addMore(data, "#more-companies");
-            addTotal(data, "#more-total");
-        });
-}
-
 let loadData = () => {
     let familyID = document.querySelector("#select-family").value;
     if (isNaN(parseInt(familyID))) return;
@@ -121,19 +196,18 @@ let loadData = () => {
         .then((response) => {
             if (!response.ok) console.log(`Code: ${response.status}`);
             else return response.json();
+        }, (error) => {
+            console.log(`Получена ошибка: ${error}.`);
         })
         .then((response) => {
             let data = response.data;
-            ReactDOM.render(<Summary projects={data.summary.projects} types={data.summary.types} data={data.summary.data} total={data.summary.total} />, document.querySelector("#table-summary"));
-            ReactDOM.render(<Summary projects={data.squares.projects} types={data.squares.types.pavilion} data={data.squares.data.pavilion} total={data.squares.total.pavilion} />, document.querySelector("#table-pavilion"));
-            ReactDOM.render(<Summary projects={data.squares.projects} types={data.squares.types.street} data={data.squares.data.street} total={data.squares.total.street} />, document.querySelector("#table-street"));
-            ReactDOM.render(<Summary projects={data.squares.projects} types={data.floor.types} data={data.floor.data} total={data.floor.total} />, document.querySelector("#table-floor"));
-            document.querySelector("#more-companies").innerHTML = "";
+            ReactDOM.render(<Accordion id="accordion-analyze" />, document.querySelector("#tables"));
+            ReactDOM.render(<Summary type="global" projects={data.summary.projects} types={data.summary.types} data={data.summary.data} total={data.summary.total} />, document.querySelector("#table-summary"));
+            ReactDOM.render(<Summary type="squares" projects={data.squares.projects} types={data.squares.types.pavilion} data={data.squares.data.pavilion} total={data.squares.total.pavilion} />, document.querySelector("#table-pavilion"));
+            ReactDOM.render(<Summary type="squares" projects={data.squares.projects} types={data.squares.types.street} data={data.squares.data.street} total={data.squares.total.street} />, document.querySelector("#table-street"));
+            ReactDOM.render(<Summary type="2th-floor" projects={data.squares.projects} types={data.floor.types} data={data.floor.data} total={data.floor.total} />, document.querySelector("#table-floor"));
         }, (error) => {
-
-        })
-        .catch((response) => {
-            console.log(`Получена ошибка: ${response}.`);
+            console.log(`Получена ошибка: ${error}.`);
         });
 }
 
@@ -158,88 +232,3 @@ let getExcludedProjects = (familyID) => {
     }
     return exclude;
 }
-
-let addProjects = (data) => {
-    let thead = document.querySelectorAll(".projects-head");
-    for (let head of thead) {
-        head.innerHTML = '<th>Площадь</th>';
-        for (let projectID in data.projects) {
-            let th = document.createElement('th');
-            th.innerText = data.projects[projectID];
-            th.colSpan = 2;
-            head.appendChild(th);
-        }
-    }
-}
-
-let addTotal = (data, selector, square_type = false) => {
-    let total = document.querySelector(selector);
-    total.innerHTML = '<th>Итого</th>';
-    for (let projectID in data.projects) {
-        for (let what of ['square', 'money']) {
-            let th_total = document.createElement('th');
-            th_total.innerText = (!square_type) ? data.total[projectID][what] : data.total[square_type][projectID][what];
-            total.appendChild(th_total);
-        }
-    }
-}
-
-let addSquare = (data, selector, square_type = false) => {
-    let tbody = document.querySelector(selector);
-    tbody.innerHTML = '';
-    for (let typeID in (!square_type) ? data.types: data.types[square_type]) {
-        let tr = document.createElement('tr');
-        let td = document.createElement('td');
-        let a = document.createElement('a');
-        a.href = '#';
-        a.addEventListener('click', () => {
-            loadMore(typeID, 'commercial');
-            return false;
-        });
-        a.text = (!square_type) ? data.types[typeID] : data.types[square_type][typeID];
-        td.appendChild(a);
-        tr.appendChild(td);
-        for (let projectID in data.projects) {
-            for (let what of ['square', 'money']) {
-                let td = document.createElement('td');
-                try {
-                    td.innerText = (!square_type) ? data.data[typeID][projectID][what] : data.data[square_type][typeID][projectID][what];
-                } catch (e) {
-                    td.innerText = '-';
-                } finally {
-                    tr.appendChild(td);
-                }
-            }
-        }
-        tbody.appendChild(tr);
-    }
-}
-
-let addMore = (data, selector) => {
-    let tbody = document.querySelector(selector);
-    tbody.innerHTML = '';
-    for (let company in data.companies) {
-        let tr = document.createElement('tr');
-        let td = document.createElement('td');
-        let a = document.createElement('a');
-        a.href = `https://port.icecompany.org/administrator/index.php?option=com_companies&view=company&layout=edit&id=${company}`;
-        a.text = data.companies[company];
-        a.target = '_blank';
-        td.appendChild(a);
-        tr.appendChild(td);
-        for (let projectID in data.projects) {
-            for (let what of ['square', 'money']) {
-                let td = document.createElement('td');
-                try {
-                    td.innerText = data.data[company][projectID][what];
-                } catch (e) {
-                    td.innerText = '-';
-                } finally {
-                    tr.appendChild(td);
-                }
-            }
-        }
-        tbody.appendChild(tr);
-    }
-}
-
