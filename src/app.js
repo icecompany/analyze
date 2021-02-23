@@ -20,7 +20,7 @@ class More extends React.Component {
             })
             .then((response) => {
                 let data = response.data;
-                ReactDOM.render(<Summary type="more" projects={data.projects} types={data.companies} data={data.data} total={data.total} />, document.querySelector("#table-more"));
+                ReactDOM.render(<Summary type="more" selector="more" title="Компания" projects={data.projects} types={data.companies} data={data.data} total={data.total} />, document.querySelector("#table-more"));
             });
         return false;
     }
@@ -37,11 +37,56 @@ class Summary extends React.Component {
         super(props);
     }
 
+    componentDidMount() {
+        let ths = document.querySelectorAll(`#selector-${this.props.selector} thead th`);
+        for (let n = 0; n < ths.length; n++) {
+            ths[n].addEventListener('click', () => {
+                let table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+                table = document.querySelector(`#selector-${this.props.selector}`);
+                switching = true;
+                dir = "asc";
+                while (switching) {
+                    switching = false;
+                    rows = table.getElementsByTagName("TR");
+                    for (i = 1; i < (rows.length - 1); i++) {
+                        shouldSwitch = false;
+                        x = rows[i].getElementsByTagName("TD")[n];
+                        y = rows[i + 1].getElementsByTagName("TD")[n];
+                        if (x !== undefined && y !== undefined) {
+                            if (dir === "asc") {
+                                if (parseFloat(x.innerText.toLowerCase().replaceAll(' ', '').replaceAll(',', '.')) > parseFloat(y.innerText.toLowerCase().replaceAll(' ', '').replaceAll(',', '.'))) {
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            } else if (dir === "desc") {
+                                if (parseFloat(x.innerText.toLowerCase().replaceAll(' ', '').replaceAll(',', '.')) < parseFloat(y.innerText.toLowerCase().replaceAll(' ', '').replaceAll(',', '.'))) {
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (shouldSwitch) {
+                        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                        switching = true;
+                        switchcount ++;
+                    } else {
+                        if (switchcount === 0 && dir === "asc") {
+                            dir = "desc";
+                            switching = true;
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+
     render() {
         let heads = Object.keys(this.props.projects).map((id, i) => {
-            return (
-                <th key={i} colSpan={2}>{this.props.projects[id]}</th>
-            )
+            return ['square', 'money'].map((what, j) => {
+                return (<th key={j}>{this.props.projects[id]}</th>)
+            })
         });
         let data = Object.keys(this.props.types).map((type_id, i) => {
             return (this.props.type !== 'squares') ? (
@@ -76,10 +121,10 @@ class Summary extends React.Component {
             )
         });
         return (
-            <table className="table table-hover">
+            <table className="table table-hover" id={`selector-${this.props.selector}`}>
                 <thead>
                     <tr>
-                        <th>Площадь</th>
+                        <th>{this.props.title}</th>
                         {heads}
                     </tr>
                 </thead>
@@ -202,10 +247,10 @@ let loadData = () => {
         .then((response) => {
             let data = response.data;
             ReactDOM.render(<Accordion id="accordion-analyze" />, document.querySelector("#tables"));
-            ReactDOM.render(<Summary type="global" projects={data.summary.projects} types={data.summary.types} data={data.summary.data} total={data.summary.total} />, document.querySelector("#table-summary"));
-            ReactDOM.render(<Summary type="squares" projects={data.squares.projects} types={data.squares.types.pavilion} data={data.squares.data.pavilion} total={data.squares.total.pavilion} />, document.querySelector("#table-pavilion"));
-            ReactDOM.render(<Summary type="squares" projects={data.squares.projects} types={data.squares.types.street} data={data.squares.data.street} total={data.squares.total.street} />, document.querySelector("#table-street"));
-            ReactDOM.render(<Summary type="2th-floor" projects={data.squares.projects} types={data.floor.types} data={data.floor.data} total={data.floor.total} />, document.querySelector("#table-floor"));
+            ReactDOM.render(<Summary type="global" selector="summary" title="Площадь" projects={data.summary.projects} types={data.summary.types} data={data.summary.data} total={data.summary.total} />, document.querySelector("#table-summary"));
+            ReactDOM.render(<Summary type="squares" selector="pavilion" title="Площадь" projects={data.squares.projects} types={data.squares.types.pavilion} data={data.squares.data.pavilion} total={data.squares.total.pavilion} />, document.querySelector("#table-pavilion"));
+            ReactDOM.render(<Summary type="squares" selector="street" title="Площадь" projects={data.squares.projects} types={data.squares.types.street} data={data.squares.data.street} total={data.squares.total.street} />, document.querySelector("#table-street"));
+            ReactDOM.render(<Summary type="2th-floor" selector="floor" title="Площадь" projects={data.squares.projects} types={data.floor.types} data={data.floor.data} total={data.floor.total} />, document.querySelector("#table-floor"));
         }, (error) => {
             console.log(`Получена ошибка: ${error}.`);
         });
