@@ -1,7 +1,6 @@
 'use strict';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-//import Tablesort from 'tablesort';
 window.Tablesort = require('tablesort');
 require('tablesort/src/sorts/tablesort.number');
 import React from 'react';
@@ -23,15 +22,34 @@ class More extends React.Component {
             })
             .then((response) => {
                 let data = response.data;
-                ReactDOM.render(<Summary type="more" selector="more" title="Компания" projects={data.projects} types={data.companies} data={data.data} total={data.total} />, document.querySelector("#table-more"));
+                document.querySelector(`#heading-more button`).innerText = e.target.textContent;
+                ReactDOM.render(<Summary type="more" selector="more" head="Компания" projects={data.projects} types={data.companies} data={data.data} total={data.total} />, document.querySelector("#table-more"));
             });
         return false;
     }
 
     render() {
         return (
-            <a href="#" onClick={this.load} data-square={this.props.square_type} data-commercial={this.props.commercial}>{this.props.title}</a>
+            <a href="#" data-bs-target={`#collapse-${this.props.collapse}`} data-bs-toggle="collapse" onClick={this.load} data-square={this.props.square_type} data-commercial={this.props.commercial}>{this.props.title}</a>
         )
+    }
+}
+
+class ShowCollapse extends React.Component {
+    click(e) {
+        e.preventDefault();
+        return false;
+    }
+
+    render() {
+        if (this.props.collapse !== 'sponsor' && this.props.collapse !== 'non_commercial') {
+            return (
+                <a href="#" data-bs-target={`#collapse-${this.props.collapse}`} data-bs-toggle="collapse" onClick={this.click}>{this.props.title}</a>
+            )
+        }
+        else {
+            return (this.props.title);
+        }
     }
 }
 
@@ -63,45 +81,73 @@ class Summary extends React.Component {
             }
         });
         let data = Object.keys(this.props.types).map((type_id, i) => {
-            return (this.props.type !== 'squares') ? (
-                <tr key={i}>
-                    <td>
-                        {this.props.types[type_id]}
-                    </td>
-                    {Object.keys(this.props.data[type_id]).map((projectID, j) => {
-                        if (j !== 0) {
-                            return ['square', 'percent_square', 'money', 'percent_money'].map((what, k) => {
-                                return (<td key={k}
-                                            data-sort={this.props.data[type_id][projectID][`${what}_clean`]}>{this.props.data[type_id][projectID][what]}</td>);
-                            })
-                        }
-                        else {
-                            return ['square', 'money'].map((what, k) => {
-                                return (<td key={k}
-                                            data-sort={this.props.data[type_id][projectID][`${what}_clean`]}>{this.props.data[type_id][projectID][what]}</td>);
-                            })
-                        }
-                    })}
-                </tr>
-            ) : (
-                <tr key={i}>
-                    <td>
-                        <More title={this.props.types[type_id]} square_type={type_id} commercial="commercial" />
-                    </td>
-                    {Object.keys(this.props.data[type_id]).map((projectID, j) => {
-                        if (j !== 0) {
-                            return ['square', 'percent_square', 'money', 'percent_money'].map((what, k) => {
-                                return (<td key={k}>{this.props.data[type_id][projectID][what]}</td>);
-                            })
-                        }
-                        else {
-                            return ['square', 'money'].map((what, k) => {
-                                return (<td key={k}>{this.props.data[type_id][projectID][what]}</td>);
-                            })
-                        }
-                    })}
-                </tr>
-            )
+            switch (this.props.type) {
+                case 'squares': {
+                    return (
+                        <tr key={i}>
+                            <td>
+                                <More collapse="more" title={this.props.types[type_id]} square_type={type_id} commercial="commercial" />
+                            </td>
+                            {Object.keys(this.props.data[type_id]).map((projectID, j) => {
+                                if (j !== 0) {
+                                    return ['square', 'percent_square', 'money', 'percent_money'].map((what, k) => {
+                                        return (<td key={k}>{this.props.data[type_id][projectID][what]}</td>);
+                                    })
+                                }
+                                else {
+                                    return ['square', 'money'].map((what, k) => {
+                                        return (<td key={k}>{this.props.data[type_id][projectID][what]}</td>);
+                                    })
+                                }
+                            })}
+                        </tr>
+                    )
+                }
+                case 'global': {
+                    return (
+                        <tr key={i}>
+                            <td>
+                                <ShowCollapse collapse={type_id} title={this.props.types[type_id]} />
+                            </td>
+                            {Object.keys(this.props.data[type_id]).map((projectID, j) => {
+                                if (j !== 0) {
+                                    return ['square', 'percent_square', 'money', 'percent_money'].map((what, k) => {
+                                        return (<td key={k}>{this.props.data[type_id][projectID][what]}</td>);
+                                    })
+                                }
+                                else {
+                                    return ['square', 'money'].map((what, k) => {
+                                        return (<td key={k}>{this.props.data[type_id][projectID][what]}</td>);
+                                    })
+                                }
+                            })}
+                        </tr>
+                    )
+                }
+                default: {
+                    return (
+                        <tr key={i}>
+                            <td>
+                                {this.props.types[type_id]}
+                            </td>
+                            {Object.keys(this.props.data[type_id]).map((projectID, j) => {
+                                if (j !== 0) {
+                                    return ['square', 'percent_square', 'money', 'percent_money'].map((what, k) => {
+                                        return (<td key={k}
+                                                    data-sort={this.props.data[type_id][projectID][`${what}_clean`]}>{this.props.data[type_id][projectID][what]}</td>);
+                                    })
+                                }
+                                else {
+                                    return ['square', 'money'].map((what, k) => {
+                                        return (<td key={k}
+                                                    data-sort={this.props.data[type_id][projectID][`${what}_clean`]}>{this.props.data[type_id][projectID][what]}</td>);
+                                    })
+                                }
+                            })}
+                        </tr>
+                    )
+                }
+            }
         });
         let total = Object.keys(this.props.projects).map((projectID, i) => {
             if (i !== 0) {
@@ -118,17 +164,17 @@ class Summary extends React.Component {
         return (
             <table className="table table-bordered table-hover" id={`selector-${this.props.selector}`}>
                 <thead>
-                    <tr>
-                        <th>{this.props.title}</th>
-                        {heads}
-                    </tr>
+                <tr>
+                    <th>{this.props.head}</th>
+                    {heads}
+                </tr>
                 </thead>
                 <tbody>{data}</tbody>
                 <tfoot>
-                    <tr>
-                        <th>Итого</th>
-                        {total}
-                    </tr>
+                <tr>
+                    <th>Итого</th>
+                    {total}
+                </tr>
                 </tfoot>
             </table>
         )
@@ -157,7 +203,7 @@ class AccordionItem extends React.Component {
             <div className="accordion-item">
                 <h4 className="accordion-header" id={`heading-${this.props.id}`}>
                     <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target={`#collapse-${this.props.id}`} aria-expanded="false" aria-controls={`collapse-${this.props.id}`}>
+                            data-bs-target={`#collapse-${this.props.id}`} aria-expanded={this.props.expand} aria-controls={`collapse-${this.props.id}`}>
                         {this.props.title}
                     </button>
                 </h4>
@@ -186,7 +232,7 @@ class Accordion extends React.Component {
             "more": "Подробнее"
         };
         let accordion_items = Object.keys(items).map((id, i) => {
-            return (<AccordionItem key={i} id={id} title={items[id]} accordion={this.props.id} />)
+            return (<AccordionItem key={i} id={id} title={items[id]} accordion={this.props.id} expand="false" />)
         });
         return (
             <div className="accordion" id={this.props.id}>
@@ -242,10 +288,10 @@ let loadData = () => {
         .then((response) => {
             let data = response.data;
             ReactDOM.render(<Accordion id="accordion-analyze" />, document.querySelector("#tables"));
-            ReactDOM.render(<Summary type="global" selector="summary" title="Площадь" projects={data.summary.projects} types={data.summary.types} data={data.summary.data} total={data.summary.total} />, document.querySelector("#table-summary"));
-            ReactDOM.render(<Summary type="squares" selector="pavilion" title="Площадь" projects={data.squares.projects} types={data.squares.types.pavilion} data={data.squares.data.pavilion} total={data.squares.total.pavilion} />, document.querySelector("#table-pavilion"));
-            ReactDOM.render(<Summary type="squares" selector="street" title="Площадь" projects={data.squares.projects} types={data.squares.types.street} data={data.squares.data.street} total={data.squares.total.street} />, document.querySelector("#table-street"));
-            ReactDOM.render(<Summary type="2th-floor" selector="floor" title="Площадь" projects={data.squares.projects} types={data.floor.types} data={data.floor.data} total={data.floor.total} />, document.querySelector("#table-floor"));
+            ReactDOM.render(<Summary type="global" selector="summary" head="Площадь" projects={data.summary.projects} types={data.summary.types} data={data.summary.data} total={data.summary.total} />, document.querySelector("#table-summary"));
+            ReactDOM.render(<Summary type="squares" selector="pavilion" head="Площадь" projects={data.squares.projects} types={data.squares.types.pavilion} data={data.squares.data.pavilion} total={data.squares.total.pavilion} />, document.querySelector("#table-pavilion"));
+            ReactDOM.render(<Summary type="squares" selector="street" head="Площадь" projects={data.squares.projects} types={data.squares.types.street} data={data.squares.data.street} total={data.squares.total.street} />, document.querySelector("#table-street"));
+            ReactDOM.render(<Summary type="2th-floor" selector="floor" head="Площадь" projects={data.squares.projects} types={data.floor.types} data={data.floor.data} total={data.floor.total} />, document.querySelector("#table-floor"));
         }, (error) => {
             console.log(`Получена ошибка: ${error}.`);
         });
