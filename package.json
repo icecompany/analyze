@@ -13,7 +13,6 @@
   "dependencies": {
     "@popperjs/core": "^2.6.0",
     "bootstrap": "^5.0.0-beta2",
-    "bootstrap-icons": "^1.4.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "tablesort": "^5.2.1"

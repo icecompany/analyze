@@ -104,11 +104,16 @@ class Summary extends React.Component {
             )
         });
         let total = Object.keys(this.props.projects).map((projectID, i) => {
-            return (
-                Object.keys(this.props.total[projectID]).map((type, j) => {
-                    return (<th key={j}>{this.props.total[projectID][type]}</th>)
+            if (i !== 0) {
+                return ['square', 'percent_square', 'money', 'percent_money'].map((what, k) => {
+                    return (<th key={k}>{this.props.total[projectID][what]}</th>);
                 })
-            )
+            }
+            else {
+                return ['square', 'money'].map((what, k) => {
+                    return (<th key={k}>{this.props.total[projectID][what]}</th>);
+                })
+            }
         });
         return (
             <table className="table table-bordered table-hover" id={`selector-${this.props.selector}`}>
