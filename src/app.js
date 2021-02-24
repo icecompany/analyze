@@ -2,6 +2,7 @@
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 window.Tablesort = require('tablesort');
+window.bootstrap = require('bootstrap');
 require('tablesort/src/sorts/tablesort.number');
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -262,7 +263,7 @@ window.onload = () => {
 }
 
 let checkAuth = () => {
-    const url = "/administrator/index.php?option=com_janalyze&task=summary.execute&familyID=1&format=json";
+    const url = "/administrator/index.php?option=com_janalyze&task=summary.execute&familyID=1&excludeID=5&format=json";
     fetch(url)
         .then((response) => {
             if (response.status !== 403) {
@@ -305,22 +306,22 @@ let loadData = () => {
 
 let getURISummary = (familyID) => {
     let url = `/administrator/index.php?option=com_janalyze&task=summary.execute&familyID=${familyID}&format=json`;
-    let excludeID = getExcludedProjects(familyID);
-    if (excludeID.length > 0) url += excludeID;
+    let projectID = getProjects(familyID);
+    if (projectID.length > 0) url += projectID;
     return url;
 }
 
 let getURITypes = (familyID, square_type, commercial) => {
     let url = `/administrator/index.php?option=com_janalyze&task=types.execute&familyID=${familyID}&square_type=${square_type}&commercial=${commercial}&format=json`;
-    let excludeID = getExcludedProjects(familyID);
-    if (excludeID.length > 0) url += excludeID;
+    let projectID = getProjects(familyID);
+    if (projectID.length > 0) url += projectID;
     return url;
 }
 
-let getExcludedProjects = (familyID) => {
-    let exclude = '';
+let getProjects = (familyID) => {
+    let result = '';
     for (let project of projects) {
-        if (!project.checked && parseInt(familyID) === parseInt(project.dataset.family)) exclude += `&excludeID[]=${project.dataset.id}`;
+        if (project.checked && parseInt(familyID) === parseInt(project.dataset.family)) result += `&projectID[]=${project.dataset.id}`;
     }
-    return exclude;
+    return result;
 }
