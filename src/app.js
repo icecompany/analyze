@@ -64,18 +64,24 @@ class Summary extends React.Component {
     }
 
     render() {
+        let titles = {
+            'square': 'кв. м.',
+            'percent_square': '% площ.',
+            'money': 'руб.',
+            'percent_money': '% руб.',
+        }
         let heads = Object.keys(this.props.projects).map((id, i) => {
             if (i !== 0) {
                 return ['square', 'percent_square', 'money', 'percent_money'].map((what, j) => {
                     return (
-                        <th key={j} style={{cursor: "pointer"}} data-sort-method='number'>{this.props.projects[id]}</th>
+                        <th key={j} style={{cursor: "pointer"}} data-sort-method='number'>{`${this.props.projects[id]} (${titles[what]})`}</th>
                     )
                 })
             }
             else {
                 return ['square', 'money'].map((what, j) => {
                     return (
-                        <th key={j} style={{cursor: "pointer"}} data-sort-method='number'>{this.props.projects[id]}</th>
+                        <th key={j} style={{cursor: "pointer"}} data-sort-method='number'>{`${this.props.projects[id]} (${titles[what]})`}</th>
                     )
                 })
             }
