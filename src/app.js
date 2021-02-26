@@ -71,123 +71,47 @@ class Summary extends React.Component {
             'money': 'руб.',
             'percent_money': '% руб.',
         }
+        let color = {
+            'square': '#4F4F4F',
+            'percent_square': '#666666',
+            'money': 'black',
+            'percent_money': '#666666',
+        }
+        let background = {
+            0: '#D1FFD1',
+            1: '#B7E2B7',
+        }
         let heads = Object.keys(this.props.projects).map((id, i) => {
-            if (i !== 0) {
-                return ['square', 'percent_square', 'money', 'percent_money'].map((what, j) => {
-                    return (
-                        <th key={j} style={{cursor: "pointer"}} data-sort-method='number'>{`${this.props.projects[id]} (${titles[what]})`}</th>
-                    )
-                })
-            }
-            else {
-                return ['square', 'money'].map((what, j) => {
-                    return (
-                        <th key={j} style={{cursor: "pointer"}} data-sort-method='number'>{`${this.props.projects[id]} (${titles[what]})`}</th>
-                    )
-                })
-            }
+            return ((i !== 0) ? ['square', 'percent_square', 'money', 'percent_money'] : ['square', 'money']).map((what, j) => {
+                return (
+                    <th key={j} style={{cursor: "pointer", backgroundColor: background[i % 2], color: color[what]}} data-sort-method='number'>{`${this.props.projects[id]} (${titles[what]})`}</th>
+                )
+            })
         });
         let data = Object.keys(this.props.types).map((type_id, i) => {
-            switch (this.props.type) {
-                case 'squares': {
-                    return (
-                        <tr key={i}>
-                            <td>
-                                <More collapse="more" title={this.props.types[type_id]} square_type={type_id} commercial="commercial" />
-                            </td>
-                            {Object.keys(this.props.data[type_id]).map((projectID, j) => {
-                                if (j !== 0) {
-                                    return ['square', 'percent_square', 'money', 'percent_money'].map((what, k) => {
-                                        return (<td key={k}>{this.props.data[type_id][projectID][what]}</td>);
-                                    })
-                                }
-                                else {
-                                    return ['square', 'money'].map((what, k) => {
-                                        return (<td key={k}>{this.props.data[type_id][projectID][what]}</td>);
-                                    })
-                                }
-                            })}
-                        </tr>
-                    )
-                }
-                case 'global': {
-                    return (
-                        <tr key={i}>
-                            <td>
-                                <ShowCollapse collapse={type_id} title={this.props.types[type_id]} />
-                            </td>
-                            {Object.keys(this.props.data[type_id]).map((projectID, j) => {
-                                if (j !== 0) {
-                                    return ['square', 'percent_square', 'money', 'percent_money'].map((what, k) => {
-                                        return (<td key={k}>{this.props.data[type_id][projectID][what]}</td>);
-                                    })
-                                }
-                                else {
-                                    return ['square', 'money'].map((what, k) => {
-                                        return (<td key={k}>{this.props.data[type_id][projectID][what]}</td>);
-                                    })
-                                }
-                            })}
-                        </tr>
-                    )
-                }
-                case 'more': {
-                    return (
-                        <tr key={i}>
-                            <td>
-                                <a href={`/administrator/index.php?option=com_companies&task=company.edit&id=${type_id}`} target="_blank">{this.props.types[type_id]}</a>
-                            </td>
-                            {Object.keys(this.props.data[type_id]).map((projectID, j) => {
-                                if (j !== 0) {
-                                    return ['square', 'percent_square', 'money', 'percent_money'].map((what, k) => {
-                                        return (<td key={k}>{this.props.data[type_id][projectID][what]}</td>);
-                                    })
-                                }
-                                else {
-                                    return ['square', 'money'].map((what, k) => {
-                                        return (<td key={k}>{this.props.data[type_id][projectID][what]}</td>);
-                                    })
-                                }
-                            })}
-                        </tr>
-                    )
-                }
-                default: {
-                    return (
-                        <tr key={i}>
-                            <td>
-                                {this.props.types[type_id]}
-                            </td>
-                            {Object.keys(this.props.data[type_id]).map((projectID, j) => {
-                                if (j !== 0) {
-                                    return ['square', 'percent_square', 'money', 'percent_money'].map((what, k) => {
-                                        return (<td key={k}
-                                                    data-sort={this.props.data[type_id][projectID][`${what}_clean`]}>{this.props.data[type_id][projectID][what]}</td>);
-                                    })
-                                }
-                                else {
-                                    return ['square', 'money'].map((what, k) => {
-                                        return (<td key={k}
-                                                    data-sort={this.props.data[type_id][projectID][`${what}_clean`]}>{this.props.data[type_id][projectID][what]}</td>);
-                                    })
-                                }
-                            })}
-                        </tr>
-                    )
-                }
+            let items = {
+                global: <ShowCollapse collapse={type_id} title={this.props.types[type_id]} />,
+                squares: <More collapse="more" title={this.props.types[type_id]} square_type={type_id} commercial="commercial" />,
+                '2th-floor': this.props.types[type_id],
+                more: <a href={`/administrator/index.php?option=com_companies&task=company.edit&id=${type_id}`} target="_blank">{this.props.types[type_id]}</a>
             }
+            return (
+                <tr key={i}>
+                    <td>
+                        {items[this.props.type]}
+                    </td>
+                    {Object.keys(this.props.data[type_id]).map((projectID, j) => {
+                        return ((j !== 0) ? ['square', 'percent_square', 'money', 'percent_money'] : ['square', 'money']).map((what, k) => {
+                            return (<td style={{backgroundColor: background[j % 2], color: color[what]}} key={k}>{this.props.data[type_id][projectID][what]}</td>);
+                        });
+                    })}
+                </tr>
+            )
         });
         let total = Object.keys(this.props.projects).map((projectID, i) => {
-            if (i !== 0) {
-                return ['square', 'percent_square', 'money', 'percent_money'].map((what, k) => {
-                    return (<th key={k}>{this.props.total[projectID][what]}</th>);
-                })
-            }
-            else {
-                return ['square', 'money'].map((what, k) => {
-                    return (<th key={k}>{this.props.total[projectID][what]}</th>);
-                })
-            }
+            return ((i !== 0) ? ['square', 'percent_square', 'money', 'percent_money'] : ['square', 'money']).map((what, k) => {
+                return (<th style={{backgroundColor: background[i % 2], color: color[what]}} key={k}>{this.props.total[projectID][what]}</th>);
+            })
         });
         return (
             <table className="table table-bordered table-hover" id={`selector-${this.props.selector}`}>
