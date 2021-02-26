@@ -7,6 +7,76 @@ require('tablesort/src/sorts/tablesort.number');
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+let families = {
+    1: {
+        title: "Армия",
+        projects: {
+            5: {
+                title: "Армия-2019",
+                alias: 'army-19',
+                checked: false
+            },
+            11: {
+                title: "Армия-2020",
+                alias: 'army-2020',
+                checked: true
+            },
+            12: {
+                title: "Армия-2021",
+                alias: 'army-2021',
+                checked: true
+            }
+        }
+    },
+    2: {
+        title: "Комплексная-безопасность",
+        projects: {
+            6: {
+                title: "КБ-2019",
+                alias: 'kb-2019',
+                checked: true
+            },
+            30: {
+                title: "КБ-2021",
+                alias: 'kb-2021',
+                checked: true
+            },
+        }
+    }
+}
+
+class Project extends React.Component {
+    componentDidMount() {
+        loadData();
+    }
+
+    render() {
+        let project = this.props.project;
+        return (
+            <div className="form-check form-switch form-check-inline">
+                <input type="checkbox" className="form-check-input" defaultChecked={project.checked} onChange={loadData} data-family={this.props.familyID} data-id={this.props.projectID} id={project.alias} />
+                <label className="form-check-label" htmlFor={project.alias}>{project.title}</label>
+            </div>
+        )
+    }
+}
+
+
+class Projects extends React.Component {
+    render() {
+        let familyID = this.props.familyID;
+        return (
+            <div data-id={familyID} className="select-project form-check-inline">
+                {Object.keys(this.props.projects).map((projectID, i) => {
+                    return (
+                        <Project familyID={familyID} projectID={projectID} project={this.props.projects[projectID]} key={i} />
+                    )
+                })}
+            </div>
+        )
+    }
+}
+
 class More extends React.Component {
     constructor(props) {
         super(props);
@@ -134,9 +204,16 @@ class Summary extends React.Component {
 }
 
 class Families extends React.Component {
+    loadProjects(event) {
+        if (event.target.value !== undefined) {
+            let familyID = event.target.value;
+            ReactDOM.render(<Projects familyID={familyID} projects={families[familyID].projects} />, document.querySelector("#all-projects"));
+        }
+    }
+
     render() {
         return (
-            <select className="form-select" id="select-family" defaultValue="">
+            <select className="form-select" id="select-family" onChange={this.loadProjects} defaultValue="">
                 <option value="">Семейство проектов</option>
                 <option value="1">Армия</option>
                 <option value="2">Комплексная безопасность</option>
@@ -194,42 +271,27 @@ class Accordion extends React.Component {
     }
 }
 
-let all_projects = document.querySelector("#all-projects");
-let app = document.querySelector("#app");
-let need_auth = document.querySelector("#need_auth");
 let projects = document.querySelectorAll(".select-project input[type='checkbox']");
 
-window.onload = () => {
-    ReactDOM.render(<Families />, document.querySelector("#families"));
-    all_projects.style.display = 'none';
-    checkAuth();
-    document.querySelector("#select-family").addEventListener('change', loadData, false);
-    for (let project of projects) project.addEventListener('change', loadData, false);
-}
-
-let checkAuth = () => {
-    const url = "/administrator/index.php?option=com_janalyze&task=summary.execute&familyID=1&excludeID=5&format=json";
-    fetch(url)
-        .then((response) => {
-            if (response.status !== 403) {
-                need_auth.style.display = 'none';
-            }
-            else {
-                app.style.display = 'none';
-            }
-        })
-        .catch((error) => {
-            app.style.display = 'none';
-        })
+class Filters extends React.Component {
+    render() {
+        return (
+            <div className="row">
+                <div className="col-3">
+                    <Families />
+                </div>
+                <div className="col-9" id="all-projects" />
+            </div>
+        )
+    }
 }
 
 let loadData = () => {
     let familyID = document.querySelector("#select-family").value;
     if (isNaN(parseInt(familyID))) return;
-    all_projects.style.display = 'block';
-    for (let project of document.querySelectorAll(".select-project")) project.style.display = (parseInt(project.dataset.id) !== parseInt(familyID)) ? 'none' : 'block';
     document.querySelector("#project-title").textContent = document.querySelector(`#select-family option[value='${familyID}']`).textContent;
     let url = getURISummary(familyID);
+    console.log(url);
     fetch(url)
         .then((response) => {
             if (!response.ok) console.log(`Code: ${response.status}`);
@@ -270,3 +332,57 @@ let getProjects = (familyID) => {
     }
     return result;
 }
+
+class Auth extends React.Component {
+    render() {
+        return (
+            <div className="alert alert-warning m-2">
+                Необходима авторизация в системе. Нажмите <a href="/administrator/index.php?option=com_contracts&amp;view=contracts" target="_blank">здесь</a> для входа в систему и после этого перезагрузите эту страницу.
+            </div>
+        )
+    }
+}
+
+class App extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            connected: false
+        }
+    }
+
+    connect() {
+        const url = "/administrator/index.php?option=com_janalyze&task=summary.execute&familyID=1&excludeID=5&format=json";
+        fetch(url)
+            .then((response) => {
+                if (response.status === 403) {
+                    ReactDOM.render(<Auth />, document.querySelector("#app"));
+                }
+                else {
+                    this.setState({connected: true});
+                }
+            })
+            .catch((error) => {
+                console.log(`Error in parse auth: ${error}`)
+            })
+    }
+
+    componentDidMount() {
+        this.connect();
+    }
+
+    render() {
+        return (
+            <div className="container-fluid">
+                <div className="container-fluid"><h1>Анализ продаж. <span id="project-title" /></h1></div>
+                <div className="container-fluid">
+                    <Filters />
+                </div>
+                <br/>
+                <div className="container-fluid" id="tables" />
+            </div>
+        )
+    }
+}
+
+ReactDOM.render(<App />, document.querySelector("#app"));
