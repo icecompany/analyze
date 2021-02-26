@@ -46,15 +46,20 @@ let families = {
 }
 
 class Project extends React.Component {
-    componentDidMount() {
-        loadData();
+    constructor(props) {
+        super(props);
+        this.handleChange = this.handleChange.bind(this);
+    }
+
+    handleChange() {
+        loadData(this.props.familyID);
     }
 
     render() {
         let project = this.props.project;
         return (
             <div className="form-check form-switch form-check-inline">
-                <input type="checkbox" className="form-check-input" defaultChecked={project.checked} onChange={loadData} data-family={this.props.familyID} data-id={this.props.projectID} id={project.alias} />
+                <input type="checkbox" className="form-check-input" defaultChecked={project.checked} onChange={this.handleChange} data-family={this.props.familyID} data-id={this.props.projectID} id={project.alias} />
                 <label className="form-check-label" htmlFor={project.alias}>{project.title}</label>
             </div>
         )
@@ -63,6 +68,19 @@ class Project extends React.Component {
 
 
 class Projects extends React.Component {
+    constructor(props) {
+        super(props);
+        let checked = [];
+        Object.keys(this.props.projects).map((projectID, i) => {
+            if (this.props.projects[projectID].checked) checked.push(projectID);
+        });
+        this.state = {projects: checked};
+    }
+
+    componentDidMount() {
+        loadData(this.props.familyID);
+    }
+
     render() {
         let familyID = this.props.familyID;
         return (
@@ -204,19 +222,26 @@ class Summary extends React.Component {
 }
 
 class Families extends React.Component {
-    loadProjects(event) {
+    constructor(props) {
+        super(props);
+        this.state = {families: this.props.families};
+        this.handleChange = this.handleChange.bind(this);
+    }
+
+    handleChange(event) {
         if (event.target.value !== undefined) {
             let familyID = event.target.value;
-            ReactDOM.render(<Projects familyID={familyID} projects={families[familyID].projects} />, document.querySelector("#all-projects"));
+            ReactDOM.render(<Projects familyID={familyID} projects={this.state.families[familyID].projects} />, document.querySelector("#all-projects"));
         }
     }
 
     render() {
         return (
-            <select className="form-select" id="select-family" onChange={this.loadProjects} defaultValue="">
+            <select className="form-select" id="select-family" onChange={this.handleChange} defaultValue="">
                 <option value="">Семейство проектов</option>
-                <option value="1">Армия</option>
-                <option value="2">Комплексная безопасность</option>
+                {Object.keys(this.state.families).map((familyID, i) => {
+                    return (<option value={familyID} key={i}>{families[familyID].title}</option> )
+                })}
             </select>
         )
     }
@@ -274,11 +299,20 @@ class Accordion extends React.Component {
 let projects = document.querySelectorAll(".select-project input[type='checkbox']");
 
 class Filters extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    loadFamilies() {
+        return families;
+    }
+
     render() {
+        let f = this.loadFamilies();
         return (
             <div className="row">
                 <div className="col-3">
-                    <Families />
+                    <Families families={f} />
                 </div>
                 <div className="col-9" id="all-projects" />
             </div>
@@ -286,12 +320,10 @@ class Filters extends React.Component {
     }
 }
 
-let loadData = () => {
-    let familyID = document.querySelector("#select-family").value;
+let loadData = (familyID) => {
     if (isNaN(parseInt(familyID))) return;
     document.querySelector("#project-title").textContent = document.querySelector(`#select-family option[value='${familyID}']`).textContent;
     let url = getURISummary(familyID);
-    console.log(url);
     fetch(url)
         .then((response) => {
             if (!response.ok) console.log(`Code: ${response.status}`);
@@ -313,22 +345,22 @@ let loadData = () => {
 
 let getURISummary = (familyID) => {
     let url = `/administrator/index.php?option=com_janalyze&task=summary.execute&familyID=${familyID}&format=json`;
-    let projectID = getProjects(familyID);
+    let projectID = getProjects();
     if (projectID.length > 0) url += projectID;
     return url;
 }
 
 let getURITypes = (familyID, square_type, commercial) => {
     let url = `/administrator/index.php?option=com_janalyze&task=types.execute&familyID=${familyID}&square_type=${square_type}&commercial=${commercial}&format=json`;
-    let projectID = getProjects(familyID);
+    let projectID = getProjects();
     if (projectID.length > 0) url += projectID;
     return url;
 }
 
-let getProjects = (familyID) => {
+let getProjects = () => {
     let result = '';
-    for (let project of projects) {
-        if (project.checked && parseInt(familyID) === parseInt(project.dataset.family)) result += `&projectID[]=${project.dataset.id}`;
+    for (let project of document.querySelectorAll(`.select-project div input[type='checkbox']`)) {
+        if (project.checked) result += `&projectID[]=${project.dataset.id}`;
     }
     return result;
 }
@@ -361,6 +393,8 @@ class App extends React.Component {
                 else {
                     this.setState({connected: true});
                 }
+            }, (error) => {
+                console.log(`Not auth: ${error}`)
             })
             .catch((error) => {
                 console.log(`Error in parse auth: ${error}`)
