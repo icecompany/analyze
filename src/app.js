@@ -131,6 +131,27 @@ class Summary extends React.Component {
                         </tr>
                     )
                 }
+                case 'more': {
+                    return (
+                        <tr key={i}>
+                            <td>
+                                <a href={`/administrator/index.php?option=com_companies&task=company.edit&id=${type_id}`} target="_blank">{this.props.types[type_id]}</a>
+                            </td>
+                            {Object.keys(this.props.data[type_id]).map((projectID, j) => {
+                                if (j !== 0) {
+                                    return ['square', 'percent_square', 'money', 'percent_money'].map((what, k) => {
+                                        return (<td key={k}>{this.props.data[type_id][projectID][what]}</td>);
+                                    })
+                                }
+                                else {
+                                    return ['square', 'money'].map((what, k) => {
+                                        return (<td key={k}>{this.props.data[type_id][projectID][what]}</td>);
+                                    })
+                                }
+                            })}
+                        </tr>
+                    )
+                }
                 default: {
                     return (
                         <tr key={i}>
