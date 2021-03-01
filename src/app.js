@@ -113,11 +113,35 @@ class ShowCollapse extends React.Component {
 class Summary extends React.Component {
     constructor(props) {
         super(props);
+        this.handleMouseOver = this.handleMouseOver.bind(this);
+        this.handleMouseOut = this.handleMouseOut.bind(this);
     }
 
     componentDidMount() {
         let sort = new Tablesort(document.querySelector(`#selector-${this.props.selector}`));
         sort.refresh();
+    }
+
+    handleMouseOver(event) {
+        for (let elem of document.querySelectorAll("td,th")) elem.style.opacity='0.2';
+        for (let elem of document.querySelectorAll(`td.${event.target.dataset.compare},th.${event.target.dataset.compare},td.type_${event.target.dataset.type_id},th.head_${event.target.dataset.what},th.total_${event.target.dataset.what}`)) {
+            elem.style.opacity='1';
+            elem.style.cursor = 'default';
+            elem.style.fontWeight = 'bold';
+        }
+    }
+
+    handleMouseOut(event) {
+        for (let elem of document.querySelectorAll("td")) {
+            elem.style.opacity='1';
+            elem.style.cursor = 'default';
+            elem.style.fontWeight = 'normal';
+        }
+        for (let elem of document.querySelectorAll("th")) {
+            elem.style.opacity='1';
+            elem.style.cursor = 'default';
+            elem.style.fontWeight = 'bold';
+        }
     }
 
     render() {
@@ -127,20 +151,15 @@ class Summary extends React.Component {
             'money': 'руб.',
             'percent_money': '% руб.',
         }
-        let color = {
-            'square': '#4F4F4F',
-            'percent_square': '#666666',
-            'money': 'black',
-            'percent_money': '#666666',
-        }
         let background = {
-            0: '#D1FFD1',
-            1: '#B7E2B7',
+            0: 'success',
+            1: 'secondary',
         }
+        let columns = {full: ['square', 'percent_square', 'money', 'percent_money'], short: ['square', 'money']};
         let heads = Object.keys(this.props.projects).map((id, i) => {
             return ((i !== 0) ? ['square', 'percent_square', 'money', 'percent_money'] : ['square', 'money']).map((what, j) => {
                 return (
-                    <th key={j} style={{cursor: "pointer", backgroundColor: background[i % 2], color: color[what]}} data-sort-method='number'>{`${this.props.projects[id]} (${titles[what]})`}</th>
+                    <th key={j} style={{cursor: "pointer"}} className={`head_${what}`} data-sort-method='number'>{`${this.props.projects[id]} (${titles[what]})`}</th>
                 )
             })
         });
@@ -153,12 +172,12 @@ class Summary extends React.Component {
             }
             return (
                 <tr key={i}>
-                    <td>
+                    <td className={`type_${type_id}`}>
                         {items[this.props.type]}
                     </td>
                     {Object.keys(this.props.data[type_id]).map((projectID, j) => {
                         return ((j !== 0) ? ['square', 'percent_square', 'money', 'percent_money'] : ['square', 'money']).map((what, k) => {
-                            return (<td style={{backgroundColor: background[j % 2], color: color[what]}} key={k}>{this.props.data[type_id][projectID][what]}</td>);
+                            return (<td className={`${what}_${type_id}`} key={k} data-project={projectID} data-what={what} data-type_id={type_id} data-compare={`${what}_${type_id}`} onMouseOver={this.handleMouseOver} onMouseOut={this.handleMouseOut}>{this.props.data[type_id][projectID][what]}</td>);
                         });
                     })}
                 </tr>
@@ -166,7 +185,7 @@ class Summary extends React.Component {
         });
         let total = Object.keys(this.props.projects).map((projectID, i) => {
             return ((i !== 0) ? ['square', 'percent_square', 'money', 'percent_money'] : ['square', 'money']).map((what, k) => {
-                return (<th style={{backgroundColor: background[i % 2], color: color[what]}} key={k}>{this.props.total[projectID][what]}</th>);
+                return (<th className={`total_${what}`} data-compare={`total_${what}`} onMouseOver={this.handleMouseOver} onMouseOut={this.handleMouseOut} key={k}>{this.props.total[projectID][what]}</th>);
             })
         });
         return (
