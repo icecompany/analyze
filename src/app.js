@@ -7,44 +7,6 @@ require('tablesort/src/sorts/tablesort.number');
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-let families = {
-    1: {
-        title: "Армия",
-        projects: {
-            5: {
-                title: "Армия-2019",
-                alias: 'army-19',
-                checked: false
-            },
-            11: {
-                title: "Армия-2020",
-                alias: 'army-2020',
-                checked: true
-            },
-            12: {
-                title: "Армия-2021",
-                alias: 'army-2021',
-                checked: true
-            }
-        }
-    },
-    2: {
-        title: "Комплексная-безопасность",
-        projects: {
-            6: {
-                title: "КБ-2019",
-                alias: 'kb-2019',
-                checked: true
-            },
-            30: {
-                title: "КБ-2021",
-                alias: 'kb-2021',
-                checked: true
-            },
-        }
-    }
-}
-
 class Project extends React.Component {
     constructor(props) {
         super(props);
@@ -240,7 +202,7 @@ class Families extends React.Component {
             <select className="form-select" id="select-family" onChange={this.handleChange} defaultValue="">
                 <option value="">Семейство проектов</option>
                 {Object.keys(this.state.families).map((familyID, i) => {
-                    return (<option value={familyID} key={i}>{families[familyID].title}</option> )
+                    return (<option value={familyID} key={i}>{this.state.families[familyID].title}</option> )
                 })}
             </select>
         )
@@ -296,23 +258,16 @@ class Accordion extends React.Component {
     }
 }
 
-let projects = document.querySelectorAll(".select-project input[type='checkbox']");
-
 class Filters extends React.Component {
     constructor(props) {
         super(props);
     }
 
-    loadFamilies() {
-        return families;
-    }
-
     render() {
-        let f = this.loadFamilies();
         return (
             <div className="row">
                 <div className="col-3">
-                    <Families families={f} />
+                    <Families families={this.props.families} />
                 </div>
                 <div className="col-9" id="all-projects" />
             </div>
@@ -375,11 +330,28 @@ class Auth extends React.Component {
     }
 }
 
+class Spinner extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        return (
+            <div className={`spinner-border text-${this.props.type}`} role="status">
+                <span className="visually-hidden">{this.props.text}</span>
+            </div>
+        )
+    }
+}
+
 class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            connected: false
+            connected: false,
+            url: {
+                families:'src/data/families.json'
+            }
         }
     }
 
@@ -392,6 +364,7 @@ class App extends React.Component {
                 }
                 else {
                     this.setState({connected: true});
+                    this.loadFilters();
                 }
             }, (error) => {
                 console.log(`Not auth: ${error}`)
@@ -401,7 +374,23 @@ class App extends React.Component {
             })
     }
 
+    loadFilters() {
+        fetch(this.state.url.families)
+            .then((response) => {
+                if (!response.ok) console.log(`Code: ${response.status}`);
+                else return response.json();
+            }, (error) => {
+                console.log(`Получена ошибка: ${error}.`);
+            })
+            .then((families) => {
+                ReactDOM.render(<Filters families={families} />, document.querySelector(`#filters`));
+            }, (error) => {
+                console.log(`Получена ошибка (1): ${error}.`);
+            })
+    }
+
     componentDidMount() {
+        ReactDOM.render(<Spinner type="primary" text="Загружаем проекты" />, document.querySelector("#filters"));
         this.connect();
     }
 
@@ -409,9 +398,7 @@ class App extends React.Component {
         return (
             <div className="container-fluid">
                 <div className="container-fluid"><h1>Анализ продаж. <span id="project-title" /></h1></div>
-                <div className="container-fluid">
-                    <Filters />
-                </div>
+                <div className="container-fluid" id="filters" />
                 <br/>
                 <div className="container-fluid" id="tables" />
             </div>
