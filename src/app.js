@@ -6,6 +6,8 @@ window.bootstrap = require('bootstrap');
 require('tablesort/src/sorts/tablesort.number');
 import React from 'react';
 import ReactDOM from 'react-dom';
+import Spinner from "./components/spinner";
+import Auth from "./components/auth";
 
 class Project extends React.Component {
     constructor(props) {
@@ -21,7 +23,7 @@ class Project extends React.Component {
         let project = this.props.project;
         return (
             <div className="form-check form-switch form-check-inline">
-                <input type="checkbox" className="form-check-input" defaultChecked={project.checked} onChange={this.handleChange} data-family={this.props.familyID} data-id={this.props.projectID} id={project.alias} />
+                <input type="checkbox" key={this.props.projectID} className="form-check-input" defaultChecked={project.checked} onChange={this.handleChange} data-family={this.props.familyID} data-id={this.props.projectID} id={project.alias} />
                 <label className="form-check-label" htmlFor={project.alias}>{project.title}</label>
             </div>
         )
@@ -40,6 +42,10 @@ class Projects extends React.Component {
     }
 
     componentDidMount() {
+        loadData(this.props.familyID);
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
         loadData(this.props.familyID);
     }
 
@@ -186,14 +192,13 @@ class Summary extends React.Component {
 class Families extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {families: this.props.families};
         this.handleChange = this.handleChange.bind(this);
     }
 
     handleChange(event) {
         if (event.target.value !== undefined) {
             let familyID = event.target.value;
-            ReactDOM.render(<Projects familyID={familyID} projects={this.state.families[familyID].projects} />, document.querySelector("#all-projects"));
+            ReactDOM.render(<Projects familyID={familyID} projects={this.props.families[familyID].projects} />, document.querySelector("#all-projects"));
         }
     }
 
@@ -201,8 +206,8 @@ class Families extends React.Component {
         return (
             <select className="form-select" id="select-family" onChange={this.handleChange} defaultValue="">
                 <option value="">Семейство проектов</option>
-                {Object.keys(this.state.families).map((familyID, i) => {
-                    return (<option value={familyID} key={i}>{this.state.families[familyID].title}</option> )
+                {Object.keys(this.props.families).map((familyID, i) => {
+                    return (<option value={familyID} key={i}>{this.props.families[familyID].title}</option> )
                 })}
             </select>
         )
@@ -278,6 +283,7 @@ class Filters extends React.Component {
 let loadData = (familyID) => {
     if (isNaN(parseInt(familyID))) return;
     document.querySelector("#project-title").textContent = document.querySelector(`#select-family option[value='${familyID}']`).textContent;
+    ReactDOM.render(<Spinner type="primary" text="Загружаем результаты..." />, document.querySelector("#tables"));
     let url = getURISummary(familyID);
     fetch(url)
         .then((response) => {
@@ -318,30 +324,6 @@ let getProjects = () => {
         if (project.checked) result += `&projectID[]=${project.dataset.id}`;
     }
     return result;
-}
-
-class Auth extends React.Component {
-    render() {
-        return (
-            <div className="alert alert-warning m-2">
-                Необходима авторизация в системе. Нажмите <a href="/administrator/index.php?option=com_contracts&amp;view=contracts" target="_blank">здесь</a> для входа в систему и после этого перезагрузите эту страницу.
-            </div>
-        )
-    }
-}
-
-class Spinner extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    render() {
-        return (
-            <div className={`spinner-border text-${this.props.type}`} role="status">
-                <span className="visually-hidden">{this.props.text}</span>
-            </div>
-        )
-    }
 }
 
 class App extends React.Component {
