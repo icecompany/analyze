@@ -264,6 +264,7 @@ class Accordion extends React.Component {
     }
 
     render() {
+        let square_types = this.props.square_types;
         let items = {
             "summary": "Суммарная таблица",
             "pavilion": "В павильоне",
@@ -271,8 +272,8 @@ class Accordion extends React.Component {
             "floor": "Второй этаж",
             "more": "Подробнее"
         };
-        let accordion_items = Object.keys(items).map((id, i) => {
-            return (<AccordionItem key={i} id={id} title={items[id]} accordion={this.props.id} expand="false" />)
+        let accordion_items = Object.keys(this.props.items).map((square_type, i) => {
+            return (<AccordionItem key={i} id={square_type} title={square_types[square_type]} accordion={this.props.id} expand="false" />)
         });
         return (
             <div className="accordion" id={this.props.id}>
