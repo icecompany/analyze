@@ -1,6 +1,7 @@
 'use strict';
 
 import React from "react";
+import Compare from "./compare";
 
 class Place extends React.Component {
     constructor(props) {
@@ -19,7 +20,7 @@ class Place extends React.Component {
         }
         //Шаг 6. Рендерим таблицу с данными
         if (this.props.type === 'square_type') {
-            result = (<div>Table for {this.props.place} {this.props.finance_type} {this.props.square_type}</div>)
+            result = (<Compare projects={this.props.data.projects} companies={this.props.data.companies} />)
         }
         return result;
     }
