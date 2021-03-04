@@ -315,7 +315,7 @@ let loadData = (familyID) => {
         })
         .then((response) => {
             let data = response.data;
-            ReactDOM.render(<Places structure={data.structure} type="places" id="general" />, document.querySelector("#tables"));
+            ReactDOM.render(<Places structure={data.structure} type="places" id="general" data={data} />, document.querySelector("#tables"));
             /*ReactDOM.render(<Accordion id="accordion-analyze" />, document.querySelector("#tables"));
             ReactDOM.render(<Summary type="global" selector="summary" head="Площадь" projects={data.summary.projects} types={data.summary.types} data={data.summary.data} total={data.summary.total} />, document.querySelector("#table-summary"));
             ReactDOM.render(<Summary type="squares" selector="pavilion" head="Площадь" projects={data.squares.projects} types={data.squares.types.pavilion} data={data.squares.data.pavilion} total={data.squares.total.pavilion} />, document.querySelector("#table-pavilion"));
