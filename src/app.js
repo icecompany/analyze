@@ -8,6 +8,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Spinner from "./components/spinner";
 import Auth from "./components/auth";
+import Places from "./components/places";
 
 class Project extends React.Component {
     constructor(props) {
@@ -314,25 +315,26 @@ let loadData = (familyID) => {
         })
         .then((response) => {
             let data = response.data;
-            ReactDOM.render(<Accordion id="accordion-analyze" />, document.querySelector("#tables"));
+            ReactDOM.render(<Places structure={data.structure} type="places" id="general" />, document.querySelector("#tables"));
+            /*ReactDOM.render(<Accordion id="accordion-analyze" />, document.querySelector("#tables"));
             ReactDOM.render(<Summary type="global" selector="summary" head="Площадь" projects={data.summary.projects} types={data.summary.types} data={data.summary.data} total={data.summary.total} />, document.querySelector("#table-summary"));
             ReactDOM.render(<Summary type="squares" selector="pavilion" head="Площадь" projects={data.squares.projects} types={data.squares.types.pavilion} data={data.squares.data.pavilion} total={data.squares.total.pavilion} />, document.querySelector("#table-pavilion"));
             ReactDOM.render(<Summary type="squares" selector="street" head="Площадь" projects={data.squares.projects} types={data.squares.types.street} data={data.squares.data.street} total={data.squares.total.street} />, document.querySelector("#table-street"));
-            ReactDOM.render(<Summary type="2th-floor" selector="floor" head="Площадь" projects={data.squares.projects} types={data.floor.types} data={data.floor.data} total={data.floor.total} />, document.querySelector("#table-floor"));
+            ReactDOM.render(<Summary type="2th-floor" selector="floor" head="Площадь" projects={data.squares.projects} types={data.floor.types} data={data.floor.data} total={data.floor.total} />, document.querySelector("#table-floor")); */
         }, (error) => {
             console.log(`Получена ошибка: ${error}.`);
         });
 }
 
 let getURISummary = (familyID) => {
-    let url = `/administrator/index.php?option=com_janalyze&task=summary.execute&familyID=${familyID}&format=json`;
+    let url = `/administrator/index.php?option=com_janalyze&task=items.execute&familyID=${familyID}&format=json`;
     let projectID = getProjects();
     if (projectID.length > 0) url += projectID;
     return url;
 }
 
 let getURITypes = (familyID, square_type, commercial) => {
-    let url = `/administrator/index.php?option=com_janalyze&task=types.execute&familyID=${familyID}&square_type=${square_type}&commercial=${commercial}&format=json`;
+    let url = `/administrator/index.php?option=com_janalyze&task=items.execute&familyID=${familyID}&square_type=${square_type}&commercial=${commercial}&format=json`;
     let projectID = getProjects();
     if (projectID.length > 0) url += projectID;
     return url;
