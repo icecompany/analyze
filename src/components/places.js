@@ -20,7 +20,7 @@ class Place extends React.Component {
         }
         //Шаг 6. Рендерим таблицу с данными
         if (this.props.type === 'square_type') {
-            result = (<Compare projects={this.props.data.projects} companies={this.props.data.companies} />)
+            result = (<Compare projects={this.props.data.projects} companies={this.props.data.companies} data={this.props.data.data} total={this.props.data.total} place={this.props.place} finance_type={this.props.finance_type} square_type={this.props.square_type} />)
         }
         return result;
     }
