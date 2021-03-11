@@ -106,6 +106,11 @@ export default class Compare extends React.Component {
                                             value = formatter.format(data[companyID][projectID][this.props.place][this.props.finance_type][this.props.square_type][column]);
                                             break;
                                         }
+                                        case 'percent_square':
+                                        case 'percent_money': {
+                                            value = `${data[companyID][projectID][this.props.place][this.props.finance_type][this.props.square_type][column]}%`
+                                            break;
+                                        }
                                         default: {
                                             value = data[companyID][projectID][this.props.place][this.props.finance_type][this.props.square_type][column];
                                         }
