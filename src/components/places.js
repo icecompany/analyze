@@ -3,9 +3,34 @@
 import React from "react";
 import Compare from "./compare";
 
+const formatter = new Intl.NumberFormat("ru", {
+    style: "currency",
+    currency: "RUB",
+    minimumFractionDigits: 2
+});
+
 class Place extends React.Component {
     constructor(props) {
         super(props);
+    }
+
+    getTitleKey(i) {
+        return (i > 0) ? 'full' : 'short';
+    }
+
+    getColumns() {
+        return {
+            full: {
+                square: 'Кв. м.',
+                money: 'Руб.',
+                percent_square: 'Динамика кв. м.',
+                percent_money: 'Динамика руб.'
+            },
+            short: {
+                square: 'Кв. м.',
+                money: 'Руб.'
+            }
+        }
     }
 
     getItems() {
@@ -28,12 +53,55 @@ class Place extends React.Component {
     render() {
         let items = this.getItems();
         let head_id = `accordion-heading-${this.props.id}`;
+        let columns = this.getColumns();
+        let column_width = Math.round(80 / (4 * Object.keys(this.props.data.projects).length) - 2);
+        let projects = Object.keys(this.props.data.projects).map((projectID, i) => {
+            let key = this.getTitleKey(i);
+            return Object.keys(columns[key]).map((param, j) => {
+                let total = 0;
+                let value = '';
+                switch(this.props.type) {
+                    case 'finance_types': {
+                        value = this.props.data.total.by_places[projectID][this.props.place][param];
+                        break;
+                    }
+                    case 'square_types': {
+                        value = this.props.data.total.by_finance_types[projectID][this.props.place][this.props.finance_type][param];
+                        break;
+                    }
+                    default: {
+                        value = this.props.data.total.by_squares[projectID][this.props.place][this.props.finance_type][this.props.square_type][param];
+                    }
+                }
+                switch(param) {
+                    case 'square': {
+                        total = Math.round(value);
+                        break;
+                    }
+                    case 'money': {
+                        total = formatter.format(value);
+                        break;
+                    }
+                    default: {
+                        total = value + "%";
+                    }
+                }
+                return (<td key={j} width={`${column_width}%`}>{total} {columns[key][param]}</td>)
+            })
+        });
         return (
             <div className="accordion-item">
                 <h4 className="accordion-header" id={head_id}>
                     <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target={`#collapse-${this.props.id}`} aria-expanded={this.props.expand} aria-controls={`collapse-${this.props.id}`}>
-                        {this.props.title}
+                        <table className="table table-borderless text-start">
+                            <tbody>
+                                <tr>
+                                    <td style={{width: '20%'}}><strong>{this.props.title}</strong></td>
+                                    {projects}
+                                </tr>
+                            </tbody>
+                        </table>
                     </button>
                 </h4>
                 <div id={`collapse-${this.props.id}`} className="accordion-collapse collapse" aria-labelledby={head_id}

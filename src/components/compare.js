@@ -37,9 +37,10 @@ export default class Compare extends React.Component {
     }
 
     getHeads() {
+        let column_width = Math.round(80 / (4 * Object.keys(this.props.projects).length) - 2);
         let projects = Object.keys(this.props.projects).map((projectID, i) => {
             let colspan = (i > 0) ? 4 : 2;
-            return (<th key={projectID} colSpan={colspan}>{this.props.projects[projectID]}</th>)
+            return (<th key={projectID} colSpan={colspan}>{this.props.projects[projectID].title}</th>)
         });
 
         let columns = this.getColumns();
@@ -61,13 +62,13 @@ export default class Compare extends React.Component {
                         total = this.props.total.by_squares[projectID][this.props.place][this.props.finance_type][this.props.square_type][param] + "%";
                     }
                 }
-                return (<th key={j}>{total} {columns[key][param]}</th>)
+                return (<th key={j} width={`${column_width}%`}>{total} {columns[key][param]}</th>)
             })
         });
         return (
             <thead>
             <tr>
-                <th rowSpan={3}>Компания</th>
+                <th rowSpan={3} width="20%">Компания</th>
                 {projects}
             </tr>
             <tr>
@@ -134,7 +135,6 @@ export default class Compare extends React.Component {
             <table className="table table-bordered">
                 {heads}
                 <tbody>{data}</tbody>
-                <tfoot></tfoot>
             </table>
         )
     }

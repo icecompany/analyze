@@ -25,7 +25,9 @@ class Project extends React.Component {
         return (
             <div className="form-check form-switch form-check-inline">
                 <input type="checkbox" key={this.props.projectID} className="form-check-input" defaultChecked={project.checked} onChange={this.handleChange} data-family={this.props.familyID} data-id={this.props.projectID} id={project.alias} />
-                <label className="form-check-label" htmlFor={project.alias}>{project.title}</label>
+                <label className="form-check-label courses" data-project={this.props.projectID} htmlFor={project.alias} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html={true} title="">
+                    {project.title}
+                </label>
             </div>
         )
     }
@@ -64,151 +66,6 @@ class Projects extends React.Component {
     }
 }
 
-class More extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    load(e) {
-        e.preventDefault();
-        let familyID = document.querySelector("#select-family").value;
-        if (isNaN(parseInt(familyID))) return;
-        let url = getURITypes(familyID, e.target.dataset.square, e.target.dataset.commercial);
-        fetch(url)
-            .then((response) => {
-                return response.json();
-            })
-            .then((response) => {
-                let data = response.data;
-                document.querySelector(`#heading-more button`).innerText = e.target.textContent;
-                ReactDOM.render(<Summary type="more" selector="more" head="Компания" projects={data.projects} types={data.companies} data={data.data} total={data.total} />, document.querySelector("#table-more"));
-            });
-        return false;
-    }
-
-    render() {
-        return (
-            <a href="#" data-bs-target={`#collapse-${this.props.collapse}`} data-bs-toggle="collapse" onClick={this.load} data-square={this.props.square_type} data-commercial={this.props.commercial}>{this.props.title}</a>
-        )
-    }
-}
-
-class ShowCollapse extends React.Component {
-    click(e) {
-        e.preventDefault();
-        return false;
-    }
-
-    render() {
-        if (this.props.collapse !== 'sponsor' && this.props.collapse !== 'non_commercial') {
-            return (
-                <a href="#" data-bs-target={`#collapse-${this.props.collapse}`} data-bs-toggle="collapse" onClick={this.click}>{this.props.title}</a>
-            )
-        }
-        else {
-            return (this.props.title);
-        }
-    }
-}
-
-class Summary extends React.Component {
-    constructor(props) {
-        super(props);
-        this.handleMouseOver = this.handleMouseOver.bind(this);
-        this.handleMouseOut = this.handleMouseOut.bind(this);
-    }
-
-    componentDidMount() {
-        let sort = new Tablesort(document.querySelector(`#selector-${this.props.selector}`));
-        sort.refresh();
-    }
-
-    handleMouseOver(event) {
-        for (let elem of document.querySelectorAll("td,th")) elem.style.opacity='0.2';
-        for (let elem of document.querySelectorAll(`td.${event.target.dataset.compare},th.${event.target.dataset.compare},td.type_${event.target.dataset.type_id},th.head_${event.target.dataset.what},th.total_${event.target.dataset.what}`)) {
-            elem.style.opacity='1';
-            elem.style.cursor = 'default';
-            elem.style.fontWeight = 'bold';
-        }
-    }
-
-    handleMouseOut(event) {
-        for (let elem of document.querySelectorAll("td")) {
-            elem.style.opacity='1';
-            elem.style.cursor = 'default';
-            elem.style.fontWeight = 'normal';
-        }
-        for (let elem of document.querySelectorAll("th")) {
-            elem.style.opacity='1';
-            elem.style.cursor = 'default';
-            elem.style.fontWeight = 'bold';
-        }
-    }
-
-    render() {
-        let titles = {
-            'square': 'кв. м.',
-            'percent_square': '% площ.',
-            'money': 'руб.',
-            'percent_money': '% руб.',
-        }
-        let background = {
-            0: 'success',
-            1: 'secondary',
-        }
-        let columns = {full: ['square', 'percent_square', 'money', 'percent_money'], short: ['square', 'money']};
-        let heads = Object.keys(this.props.projects).map((id, i) => {
-            return ((i !== 0) ? ['square', 'percent_square', 'money', 'percent_money'] : ['square', 'money']).map((what, j) => {
-                return (
-                    <th key={j} style={{cursor: "pointer"}} className={`head_${what}`} data-sort-method='number'>{`${this.props.projects[id]} (${titles[what]})`}</th>
-                )
-            })
-        });
-        let data = Object.keys(this.props.types).map((type_id, i) => {
-            let items = {
-                global: <ShowCollapse collapse={type_id} title={this.props.types[type_id]} />,
-                squares: <More collapse="more" title={this.props.types[type_id]} square_type={type_id} commercial="commercial" />,
-                '2th-floor': this.props.types[type_id],
-                more: <a href={`/administrator/index.php?option=com_companies&task=company.edit&id=${type_id}`} target="_blank">{this.props.types[type_id]}</a>
-            }
-            return (
-                <tr key={i}>
-                    <td className={`type_${type_id}`}>
-                        {items[this.props.type]}
-                    </td>
-                    {Object.keys(this.props.data[type_id]).map((projectID, j) => {
-                        return ((j !== 0) ? ['square', 'percent_square', 'money', 'percent_money'] : ['square', 'money']).map((what, k) => {
-                            return (<td className={`${what}_${type_id}`} key={k} data-project={projectID} data-what={what} data-type_id={type_id} data-compare={`${what}_${type_id}`} onMouseOver={this.handleMouseOver} onMouseOut={this.handleMouseOut}>{this.props.data[type_id][projectID][what]}</td>);
-                        });
-                    })}
-                </tr>
-            )
-        });
-        let total = Object.keys(this.props.projects).map((projectID, i) => {
-            return ((i !== 0) ? ['square', 'percent_square', 'money', 'percent_money'] : ['square', 'money']).map((what, k) => {
-                return (<th className={`total_${what}`} data-compare={`total_${what}`} onMouseOver={this.handleMouseOver} onMouseOut={this.handleMouseOut} key={k}>{this.props.total[projectID][what]}</th>);
-            })
-        });
-        return (
-            <table className="table table-bordered table-hover" id={`selector-${this.props.selector}`}>
-                <thead>
-                <tr>
-                    <th>{this.props.head}</th>
-                    {heads}
-                </tr>
-                </thead>
-                <tbody>{data}</tbody>
-                <tfoot>
-                <tr>
-                    <th>Итого</th>
-                    {total}
-                </tr>
-                </tfoot>
-            </table>
-        )
-    }
-}
-
 class Families extends React.Component {
     constructor(props) {
         super(props);
@@ -234,56 +91,6 @@ class Families extends React.Component {
     }
 }
 
-class AccordionItem extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    render() {
-        return (
-            <div className="accordion-item">
-                <h4 className="accordion-header" id={`heading-${this.props.id}`}>
-                    <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target={`#collapse-${this.props.id}`} aria-expanded={this.props.expand} aria-controls={`collapse-${this.props.id}`}>
-                        {this.props.title}
-                    </button>
-                </h4>
-                <div id={`collapse-${this.props.id}`} className="accordion-collapse collapse" aria-labelledby={`heading-${this.props.id}`}
-                     data-bs-parent={`#${this.props.accordion}`}>
-                    <div className="accordion-body table-result" id={`table-${this.props.id}`}>
-
-                    </div>
-                </div>
-            </div>
-        )
-    }
-}
-
-class Accordion extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    render() {
-        let square_types = this.props.square_types;
-        let items = {
-            "summary": "Суммарная таблица",
-            "pavilion": "В павильоне",
-            "street": "На улице",
-            "floor": "Второй этаж",
-            "more": "Подробнее"
-        };
-        let accordion_items = Object.keys(this.props.items).map((square_type, i) => {
-            return (<AccordionItem key={i} id={square_type} title={square_types[square_type]} accordion={this.props.id} expand="false" />)
-        });
-        return (
-            <div className="accordion" id={this.props.id}>
-                {accordion_items}
-            </div>
-        )
-    }
-}
-
 class Filters extends React.Component {
     constructor(props) {
         super(props);
@@ -301,6 +108,25 @@ class Filters extends React.Component {
     }
 }
 
+let loadCourses = (data) => {
+    for (let span of document.querySelectorAll(".courses")) {
+        try {
+            if (data.projects[span.dataset.project].course !== undefined) {
+                let course_usd = data.projects[span.dataset.project].course.usd;
+                let course_eur = data.projects[span.dataset.project].course.eur;
+                span.title = `1 USD = ${course_usd} RUB<br>1 EUR = ${course_eur} RUB`;
+            }
+        }
+        catch (e) {
+
+        }
+    }
+    let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+}
+
 let loadData = (familyID) => {
     if (isNaN(parseInt(familyID))) return;
     document.querySelector("#project-title").textContent = document.querySelector(`#select-family option[value='${familyID}']`).textContent;
@@ -316,11 +142,7 @@ let loadData = (familyID) => {
         .then((response) => {
             let data = response.data;
             ReactDOM.render(<Places structure={data.structure} type="places" id="general" data={data} />, document.querySelector("#tables"));
-            /*ReactDOM.render(<Accordion id="accordion-analyze" />, document.querySelector("#tables"));
-            ReactDOM.render(<Summary type="global" selector="summary" head="Площадь" projects={data.summary.projects} types={data.summary.types} data={data.summary.data} total={data.summary.total} />, document.querySelector("#table-summary"));
-            ReactDOM.render(<Summary type="squares" selector="pavilion" head="Площадь" projects={data.squares.projects} types={data.squares.types.pavilion} data={data.squares.data.pavilion} total={data.squares.total.pavilion} />, document.querySelector("#table-pavilion"));
-            ReactDOM.render(<Summary type="squares" selector="street" head="Площадь" projects={data.squares.projects} types={data.squares.types.street} data={data.squares.data.street} total={data.squares.total.street} />, document.querySelector("#table-street"));
-            ReactDOM.render(<Summary type="2th-floor" selector="floor" head="Площадь" projects={data.squares.projects} types={data.floor.types} data={data.floor.data} total={data.floor.total} />, document.querySelector("#table-floor")); */
+            loadCourses(data);
         }, (error) => {
             console.log(`Получена ошибка: ${error}.`);
         });
@@ -328,13 +150,6 @@ let loadData = (familyID) => {
 
 let getURISummary = (familyID) => {
     let url = `/administrator/index.php?option=com_janalyze&task=items.execute&familyID=${familyID}&format=json`;
-    let projectID = getProjects();
-    if (projectID.length > 0) url += projectID;
-    return url;
-}
-
-let getURITypes = (familyID, square_type, commercial) => {
-    let url = `/administrator/index.php?option=com_janalyze&task=items.execute&familyID=${familyID}&square_type=${square_type}&commercial=${commercial}&format=json`;
     let projectID = getProjects();
     if (projectID.length > 0) url += projectID;
     return url;
