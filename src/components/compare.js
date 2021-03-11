@@ -58,7 +58,7 @@ export default class Compare extends React.Component {
                         break;
                     }
                     default: {
-                        total = 0;
+                        total = this.props.total.by_squares[projectID][this.props.place][this.props.finance_type][this.props.square_type][param] + "%";
                     }
                 }
                 return (<th key={j}>{total} {columns[key][param]}</th>)
