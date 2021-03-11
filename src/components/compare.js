@@ -77,6 +77,13 @@ export default class Compare extends React.Component {
         )
     }
 
+    getCompanyURL(companyID, title) {
+        const url = encodeURI(`/administrator/index.php?option=com_companies&task=company.edit&id=${companyID}`);
+        return (
+            <a href={url} target="_blank" title="Открыть компанию в CRM">{title}</a>
+        );
+    }
+
     getData() {
         return (
             Object.keys(this.props.companies).map((companyID, i) => {
@@ -85,7 +92,7 @@ export default class Compare extends React.Component {
                     (total[this.props.place][this.props.finance_type][this.props.square_type]['square'] !== 0 && total[this.props.place][this.props.finance_type][this.props.square_type]['money'] === 0)) {
                     return (
                         <tr key={companyID}>
-                            <td>{this.props.companies[companyID]}</td>
+                            <td>{this.getCompanyURL(companyID, this.props.companies[companyID])}</td>
                             {Object.keys(this.props.projects).map((projectID, j) => {
                                 let data = this.props.data;
                                 return Object.keys(data[companyID][projectID][this.props.place][this.props.finance_type][this.props.square_type]).map((column, c) => {
