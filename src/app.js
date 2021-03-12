@@ -9,6 +9,8 @@ import ReactDOM from 'react-dom';
 import Spinner from "./components/spinner";
 import Auth from "./components/auth";
 import Places from "./components/places";
+import Courses from "./components/courses";
+import Global_heads from "./components/global_heads";
 
 class Project extends React.Component {
     constructor(props) {
@@ -25,7 +27,7 @@ class Project extends React.Component {
         return (
             <div className="form-check form-switch form-check-inline">
                 <input type="checkbox" key={this.props.projectID} className="form-check-input" defaultChecked={project.checked} onChange={this.handleChange} data-family={this.props.familyID} data-id={this.props.projectID} id={project.alias} />
-                <label className="form-check-label courses" data-project={this.props.projectID} htmlFor={project.alias} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html={true} title="">
+                <label className="form-check-label" data-project={this.props.projectID} htmlFor={project.alias}>
                     {project.title}
                 </label>
             </div>
@@ -108,25 +110,6 @@ class Filters extends React.Component {
     }
 }
 
-let loadCourses = (data) => {
-    for (let span of document.querySelectorAll(".courses")) {
-        try {
-            if (data.projects[span.dataset.project].course !== undefined) {
-                let course_usd = data.projects[span.dataset.project].course.usd;
-                let course_eur = data.projects[span.dataset.project].course.eur;
-                span.title = `1 USD = ${course_usd} RUB<br>1 EUR = ${course_eur} RUB`;
-            }
-        }
-        catch (e) {
-
-        }
-    }
-    let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    });
-}
-
 let loadData = (familyID) => {
     if (isNaN(parseInt(familyID))) return;
     document.querySelector("#project-title").textContent = document.querySelector(`#select-family option[value='${familyID}']`).textContent;
@@ -141,8 +124,9 @@ let loadData = (familyID) => {
         })
         .then((response) => {
             let data = response.data;
+            ReactDOM.render(<Global_heads projects={data.projects} />, document.querySelector("#global_heads"));
             ReactDOM.render(<Places structure={data.structure} type="places" id="general" data={data} />, document.querySelector("#tables"));
-            loadCourses(data);
+            ReactDOM.render(<Courses projects={data.projects} />, document.querySelector("#courses"));
         }, (error) => {
             console.log(`Получена ошибка: ${error}.`);
         });
@@ -216,9 +200,17 @@ class App extends React.Component {
     render() {
         return (
             <div className="container-fluid">
-                <div className="container-fluid"><h1>Анализ продаж. <span id="project-title" /></h1></div>
-                <div className="container-fluid" id="filters" />
+                <div className="row">
+                    <div className="col-8">
+                        <div className="container-fluid"><h1>Анализ продаж. <span id="project-title" /></h1></div>
+                        <div className="container-fluid" id="filters" />
+                    </div>
+                    <div className="col-4">
+                        <div className="container-fluid" id="courses" />
+                    </div>
+                </div>
                 <br/>
+                <div className="container-fluid" id="global_heads" />
                 <div className="container-fluid" id="tables" />
             </div>
         )
