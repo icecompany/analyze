@@ -15,6 +15,7 @@ const formatter = new Intl.NumberFormat("ru", {
 export default class Compare extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {table_id: `table-${this.props.place}_${this.props.finance_type}_${this.props.square_type}`}
     }
 
     getTitleKey(i) {
@@ -40,7 +41,7 @@ export default class Compare extends React.Component {
         let column_width = Math.round(80 / (4 * Object.keys(this.props.projects).length) - 2);
         let projects = Object.keys(this.props.projects).map((projectID, i) => {
             let colspan = (i > 0) ? 4 : 2;
-            return (<th key={projectID} colSpan={colspan}>{this.props.projects[projectID].title}</th>)
+            return (<th data-sort-method='none' key={projectID} colSpan={colspan}>{this.props.projects[projectID].title}</th>)
         });
 
         let columns = this.getColumns();
@@ -49,29 +50,34 @@ export default class Compare extends React.Component {
             let key = this.getTitleKey(i);
             return Object.keys(columns[key]).map((param, j) => {
                 let total = 0;
+                let sort_method = 'none;'
                 switch(param) {
                     case 'square': {
                         total = Math.round(this.props.total.by_squares[projectID][this.props.place][this.props.finance_type][this.props.square_type][param]);
+                        sort_method = 'number';
                         break;
                     }
                     case 'money': {
                         total = formatter.format(this.props.total.by_squares[projectID][this.props.place][this.props.finance_type][this.props.square_type][param]);
+                        sort_method = 'number';
                         break;
                     }
                     default: {
                         total = this.props.total.by_squares[projectID][this.props.place][this.props.finance_type][this.props.square_type][param] + "%";
+                        sort_method = 'number';
                     }
                 }
-                return (<th key={j} width={`${column_width}%`}>{total} {columns[key][param]}</th>)
+                return (<th style={{cursor: 'pointer'}} data-sort-method={sort_method} key={j} width={`${column_width}%`}>{total} {columns[key][param]}</th>)
             })
         });
         return (
             <thead>
             <tr>
-                <th rowSpan={3} width="20%">Компания</th>
+                <th width="20%">&nbsp;</th>
                 {projects}
             </tr>
             <tr>
+                <th width="20%" data-sort-default={true} style={{cursor: 'pointer'}}>Компания</th>
                 {params}
             </tr>
             </thead>
@@ -93,31 +99,32 @@ export default class Compare extends React.Component {
                     (total[this.props.place][this.props.finance_type][this.props.square_type]['square'] !== 0 && total[this.props.place][this.props.finance_type][this.props.square_type]['money'] === 0)) {
                     return (
                         <tr key={companyID}>
-                            <td>{this.getCompanyURL(companyID, this.props.companies[companyID])}</td>
+                            <td data-sort={this.props.companies[companyID]}>{this.getCompanyURL(companyID, this.props.companies[companyID])}</td>
                             {Object.keys(this.props.projects).map((projectID, j) => {
                                 let data = this.props.data;
                                 return Object.keys(data[companyID][projectID][this.props.place][this.props.finance_type][this.props.square_type]).map((column, c) => {
                                     let value = 0;
+                                    let data_sort = data[companyID][projectID][this.props.place][this.props.finance_type][this.props.square_type][column];
                                     switch (column) {
                                         case 'square': {
-                                            value = `${Math.round(data[companyID][projectID][this.props.place][this.props.finance_type][this.props.square_type][column])} кв. м.`;
+                                            value = `${Math.round(data_sort)} кв. м.`;
                                             break;
                                         }
                                         case 'money': {
-                                            value = formatter.format(data[companyID][projectID][this.props.place][this.props.finance_type][this.props.square_type][column]);
+                                            value = formatter.format(data_sort);
                                             break;
                                         }
                                         case 'percent_square':
                                         case 'percent_money': {
-                                            value = `${data[companyID][projectID][this.props.place][this.props.finance_type][this.props.square_type][column]}%`
+                                            value = `${data_sort}%`
                                             break;
                                         }
                                         default: {
-                                            value = data[companyID][projectID][this.props.place][this.props.finance_type][this.props.square_type][column];
+                                            value = data_sort;
                                         }
                                     }
                                     return (
-                                        <td key={column}>{value}</td>
+                                        <td key={column} data-sort={data_sort}>{value}</td>
                                     )
                                 })
                             })}
@@ -132,10 +139,20 @@ export default class Compare extends React.Component {
         const heads = this.getHeads()
         const data = this.getData()
         return (
-            <table className="table table-bordered">
+            <table className="table table-bordered" id={this.state.table_id}>
                 {heads}
                 <tbody>{data}</tbody>
             </table>
         )
+    }
+
+    componentDidMount() {
+        let tbl = new Tablesort(document.querySelector(`#${this.state.table_id}`));
+        tbl.refresh();
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        let tbl = new Tablesort(document.querySelector(`#${this.state.table_id}`));
+        tbl.refresh();
     }
 }
