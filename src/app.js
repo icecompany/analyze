@@ -23,11 +23,12 @@ class Project extends React.Component {
     }
 
     render() {
-        let project = this.props.project;
+        const project = this.props.project;
+        const alias = `project_${project.id}`;
         return (
             <div className="form-check form-switch form-check-inline">
-                <input type="checkbox" key={this.props.projectID} className="form-check-input" defaultChecked={project.checked} onChange={this.handleChange} data-family={this.props.familyID} data-id={this.props.projectID} id={project.alias} />
-                <label className="form-check-label" data-project={this.props.projectID} htmlFor={project.alias}>
+                <input type="checkbox" key={this.props.projectID} className="form-check-input" defaultChecked={project.checked} onChange={this.handleChange} data-family={this.props.familyID} data-id={this.props.projectID} id={alias} />
+                <label className="form-check-label" data-project={this.props.projectID} htmlFor={alias}>
                     {project.title}
                 </label>
             </div>
@@ -153,21 +154,20 @@ class App extends React.Component {
         this.state = {
             connected: false,
             url: {
-                families:'src/data/families.json'
+                families:'/administrator/index.php?option=com_janalyze&task=summary.execute&format=json'
             }
         }
     }
 
     connect() {
-        const url = "/administrator/index.php?option=com_janalyze&task=summary.execute&familyID=1&excludeID=5&format=json";
-        fetch(url)
+        fetch(this.state.url.families)
             .then((response) => {
                 if (response.status === 403) {
                     ReactDOM.render(<Auth />, document.querySelector("#app"));
                 }
                 else {
                     this.setState({connected: true});
-                    this.loadFilters();
+                    return response.json();
                 }
             }, (error) => {
                 console.log(`Not auth: ${error}`)
@@ -175,20 +175,8 @@ class App extends React.Component {
             .catch((error) => {
                 console.log(`Error in parse auth: ${error}`)
             })
-    }
-
-    loadFilters() {
-        fetch(this.state.url.families)
             .then((response) => {
-                if (!response.ok) console.log(`Code: ${response.status}`);
-                else return response.json();
-            }, (error) => {
-                console.log(`Получена ошибка: ${error}.`);
-            })
-            .then((families) => {
-                ReactDOM.render(<Filters families={families} />, document.querySelector(`#filters`));
-            }, (error) => {
-                console.log(`Получена ошибка (1): ${error}.`);
+                ReactDOM.render(<Filters families={response.data} />, document.querySelector(`#filters`));
             })
     }
 
