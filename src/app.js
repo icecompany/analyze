@@ -53,11 +53,11 @@ class App extends React.Component {
         return (
             <div className="container-fluid">
                 <div className="row">
-                    <div className="col-8">
+                    <div className="col-9">
                         <div className="container-fluid"><h1>Анализ продаж. <span id="project-title" /></h1></div>
                         <div className="container-fluid" id="filters" />
                     </div>
-                    <div className="col-4">
+                    <div className="col-3">
                         <div className="container-fluid" id="courses" />
                     </div>
                 </div>

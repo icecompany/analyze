@@ -6,21 +6,7 @@ import Places from "./places";
 import Courses from "./courses";
 import Families from "./families";
 import Pavilions from "./pavilions";
-
-let getDataURI = (familyID) => {
-    let url = `/administrator/index.php?option=com_janalyze&task=items.execute&familyID=${familyID}&format=json`;
-    let projectID = getProjects();
-    if (projectID.length > 0) url += projectID;
-    return url;
-}
-
-let getProjects = () => {
-    let result = '';
-    for (let project of document.querySelectorAll(`.select-project div input[type='checkbox']`)) {
-        if (project.checked) result += `&projectID[]=${project.dataset.id}`;
-    }
-    return result;
-}
+import Start from "./start";
 
 class Project extends React.Component {
     constructor(props) {
@@ -32,7 +18,7 @@ class Project extends React.Component {
         const alias = `project_${this.props.projectID}`;
         return (
             <div className="form-check form-switch form-check-inline">
-                <input type="checkbox" key={this.props.projectID} className="form-check-input" defaultChecked={project.checked} onChange={this.props.onClick} data-family={this.props.familyID} data-id={this.props.projectID} id={alias} />
+                <input type="checkbox" key={this.props.projectID} className="form-check-input" defaultChecked={project.checked} data-family={this.props.familyID} data-id={this.props.projectID} id={alias} />
                 <label className="form-check-label" data-project={this.props.projectID} htmlFor={alias}>
                     {project.title_short}
                 </label>
@@ -50,14 +36,6 @@ class Projects extends React.Component {
             if (this.props.projects[projectID].checked) checked.push(projectID);
         });
         this.state = {projects: checked};
-    }
-
-    componentDidMount() {
-        eval(this.props.onClick);
-    }
-
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        eval(this.props.onClick);
     }
 
     render() {
@@ -79,11 +57,26 @@ export default class Filters extends React.Component {
         super(props);
         this.onChangeFamilyID = this.onChangeFamilyID.bind(this);
         this.onChangePavilionID = this.onChangePavilionID.bind(this);
-        this.onClickProject = this.onClickProject.bind(this);
-        this.state = {familyID: null, pavilionID: null};
+        this.onClickStart = this.onClickStart.bind(this);
+        this.state = {familyID: null, pavilionID: null, projects: []};
     }
 
-    onClickProject(event) {
+    getDataURI() {
+        let url = `/administrator/index.php?option=com_janalyze&task=items.execute&familyID=${familyID}&format=json`;
+        let projectID = this.getSelectedProjects();
+        if (projectID.length > 0) url += projectID;
+        return url;
+    }
+
+    getSelectedProjects() {
+        let result = '';
+        for (let project of document.querySelectorAll(`.select-project div input[type='checkbox']`)) {
+            if (project.checked) result += `&projectID[]=${project.dataset.id}`;
+        }
+        return result;
+    }
+
+    onClickStart() {
         this.loadData();
     }
 
@@ -91,8 +84,6 @@ export default class Filters extends React.Component {
         if (event.target.value !== undefined) {
             let pavilion = event.target.value;
             this.setState({pavilionID: pavilion});
-            this.loadData();
-            console.log(pavilion);
         }
     }
 
@@ -101,9 +92,12 @@ export default class Filters extends React.Component {
             let familyID = event.target.value;
             if (familyID !== '') {
                 this.setState({familyID: familyID});
-                ReactDOM.render(<Projects familyID={familyID} projects={this.props.families[familyID].projects} onClick={this.onClickProject} />, document.querySelector("#all-projects"));
                 ReactDOM.render(<Pavilions onChange={this.onChangePavilionID} pavilions={this.props.families[familyID].pavilions} />, document.querySelector("#pavilions"));
-                this.loadData();
+                ReactDOM.render(<Projects familyID={familyID} projects={this.props.families[familyID].projects} />, document.querySelector("#all-projects"));
+                ReactDOM.render(<Start onClick={this.onClickStart} disabled={false} />, document.querySelector("#start"));
+            }
+            else {
+                ReactDOM.render(<Start disabled={true} />, document.querySelector("#start"));
             }
         }
     }
@@ -117,7 +111,7 @@ export default class Filters extends React.Component {
         if (isNaN(parseInt(familyID))) return;
         document.querySelector("#project-title").textContent = document.querySelector(`#select-family option[value='${familyID}']`).textContent;
         ReactDOM.render(<Spinner type="primary" text="Загружаем результаты..." />, document.querySelector("#tables"));
-        let url = getDataURI(familyID);
+        const url = this.getDataURI();
         fetch(url)
             .then((response) => {
                 if (!response.ok) console.log(`Code: ${response.status}`);
@@ -138,13 +132,12 @@ export default class Filters extends React.Component {
     render() {
         return (
             <div className="row">
-                <div className="col-3">
+                <div className="col-lg-3 col-md-6 pb-2">
                     <Families onChange={this.onChangeFamilyID} families={this.props.families} />
                 </div>
-                <div className="col-3" id="pavilions">
-
-                </div>
-                <div className="col-6" id="all-projects" />
+                <div className="col-lg-3 col-md-6 pb-2" id="pavilions" />
+                <div className="col-lg-5 col-md-6 pb-2" id="all-projects" />
+                <div className="col-lg-1  col-md-6 pb-2" id="start" />
             </div>
         )
     }
