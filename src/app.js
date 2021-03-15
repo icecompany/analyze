@@ -24,12 +24,12 @@ class Project extends React.Component {
 
     render() {
         const project = this.props.project;
-        const alias = `project_${project.id}`;
+        const alias = `project_${this.props.projectID}`;
         return (
             <div className="form-check form-switch form-check-inline">
                 <input type="checkbox" key={this.props.projectID} className="form-check-input" defaultChecked={project.checked} onChange={this.handleChange} data-family={this.props.familyID} data-id={this.props.projectID} id={alias} />
                 <label className="form-check-label" data-project={this.props.projectID} htmlFor={alias}>
-                    {project.title}
+                    {project.title_short}
                 </label>
             </div>
         )

@@ -10,7 +10,7 @@ export default class Courses extends React.Component {
     getHead() {
         const projects = Object.keys(this.props.projects).map((projectID, i) => {
             return (
-                <th key={projectID}>{this.props.projects[projectID].title}</th>
+                <th key={projectID}>{this.props.projects[projectID].title_short}</th>
             )
         })
         return (
