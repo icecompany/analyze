@@ -78,7 +78,9 @@ class Families extends React.Component {
     handleChange(event) {
         if (event.target.value !== undefined) {
             let familyID = event.target.value;
-            ReactDOM.render(<Projects familyID={familyID} projects={this.props.families[familyID].projects} />, document.querySelector("#all-projects"));
+            if (familyID !== '') {
+                ReactDOM.render(<Projects familyID={familyID} projects={this.props.families[familyID].projects}/>, document.querySelector("#all-projects"));
+            }
         }
     }
 
