@@ -23,8 +23,8 @@ class Place extends React.Component {
             full: {
                 square: 'Кв. м.',
                 money: 'Руб.',
-                percent_square: 'Динамика кв. м.',
-                percent_money: 'Динамика руб.'
+                percent_square: '',
+                percent_money: ''
             },
             short: {
                 square: 'Кв. м.',
