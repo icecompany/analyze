@@ -18,7 +18,8 @@ class App extends React.Component {
             url: {
                 families: `/administrator/index.php?option=com_janalyze&task=summary.execute&format=json`,
                 data: `/administrator/index.php?option=com_janalyze&task=items.execute&format=json`
-            }
+            },
+
         }
     }
 
