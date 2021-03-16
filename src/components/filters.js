@@ -18,7 +18,7 @@ class Project extends React.Component {
         const alias = `project_${this.props.projectID}`;
         return (
             <div className="form-check form-switch form-check-inline">
-                <input type="checkbox" key={this.props.projectID} className="form-check-input" defaultChecked={project.checked} data-family={this.props.familyID} data-id={this.props.projectID} id={alias} />
+                <input type="checkbox" key={this.props.projectID} onChange={this.props.onClick} className="form-check-input" defaultChecked={project.checked} data-family={this.props.familyID} data-id={this.props.projectID} id={alias} />
                 <label className="form-check-label" data-project={this.props.projectID} htmlFor={alias}>
                     {project.title_short}
                 </label>
@@ -57,12 +57,13 @@ export default class Filters extends React.Component {
         super(props);
         this.onChangeFamilyID = this.onChangeFamilyID.bind(this);
         this.onChangePavilionID = this.onChangePavilionID.bind(this);
-        this.onClickStart = this.onClickStart.bind(this);
-        this.state = {familyID: null, pavilionID: null, projects: []};
+        this.onCheckedProject = this.onCheckedProject.bind(this);
+        this.onSubmit = this.onSubmit.bind(this);
+        this.state = {familyID: '', pavilionID: '', projects: []};
     }
 
     getDataURI() {
-        let url = `/administrator/index.php?option=com_janalyze&task=items.execute&familyID=${familyID}&format=json`;
+        let url = `/administrator/index.php?option=com_janalyze&task=items.execute&familyID=${this.state.familyID}&format=json`;
         let projectID = this.getSelectedProjects();
         if (projectID.length > 0) url += projectID;
         return url;
@@ -76,37 +77,83 @@ export default class Filters extends React.Component {
         return result;
     }
 
-    onClickStart() {
+    onSubmit(event) {
+        event.preventDefault();
+        console.log(this.state);
         this.loadData();
     }
 
     onChangePavilionID(event) {
-        if (event.target.value !== undefined) {
-            let pavilion = event.target.value;
-            this.setState({pavilionID: pavilion});
-        }
+        this.setState({pavilionID: event.target.value});
     }
 
     onChangeFamilyID(event) {
-        if (event.target.value !== undefined) {
-            let familyID = event.target.value;
-            if (familyID !== '') {
-                this.setState({familyID: familyID});
-                ReactDOM.render(<Pavilions onChange={this.onChangePavilionID} pavilions={this.props.families[familyID].pavilions} />, document.querySelector("#pavilions"));
-                ReactDOM.render(<Projects familyID={familyID} projects={this.props.families[familyID].projects} />, document.querySelector("#all-projects"));
-                ReactDOM.render(<Start onClick={this.onClickStart} disabled={false} />, document.querySelector("#start"));
-            }
-            else {
-                ReactDOM.render(<Start disabled={true} />, document.querySelector("#start"));
-            }
+        let familyID = event.target.value;
+        if (familyID !== '') {
+            this.fillProjectsState(familyID, this.props.families[familyID].projects);
+            ReactDOM.render(<Pavilions pavilions={this.props.families[familyID].pavilions} />, document.querySelector("#pavilions"));
+            ReactDOM.render(<Projects onClick={this.onCheckedProject} familyID={familyID} projects={this.props.families[familyID].projects} />, document.querySelector("#all-projects"));
         }
+        else {
+            this.updateInterface('', this.state.pavilionID, this.state.projects);
+        }
+        this.setState({familyID: familyID});
+    }
+
+    addProjectToState(projectID) {
+        let arr = this.state.projects;
+        if (this.state.projects.indexOf(projectID) < 0) {
+            arr.push(projectID);
+            this.setState({projects: arr});
+        }
+        return arr;
+    }
+
+    removeProjectFromState(projectID) {
+        const index = this.state.projects.indexOf(projectID);
+        let arr = this.state.projects;
+        if (index >= 0) {
+            arr.splice(index, 1);
+            this.setState({projects: arr});
+        }
+        return arr;
+    }
+
+    onCheckedProject(event) {
+        const projectID = event.target.dataset.id;
+        let projects = this.state.projects;
+        if (event.target.checked) {
+            projects = this.addProjectToState(projectID);
+        }
+        else {
+            projects = this.removeProjectFromState(projectID);
+        }
+        this.updateInterface(this.state.familyID, this.state.pavilionID, projects);
+    }
+
+    fillProjectsState(familyID, projects) {
+        let arr = [];
+        Object.keys(projects).map((projectID, i) => {
+            if (projects[projectID].checked) arr.push(projectID);
+        });
+        this.setState({projects: arr});
+        this.updateInterface(familyID, this.state.pavilionID, arr);
+    }
+
+    canStart(familyID, pavilionID, projects) {
+        let can = false;
+        if (familyID !== '' && projects.length > 0) can = true;
+        return can;
+    }
+
+    updateInterface(familyID, pavilionID, projects) {
+        const disabled = (!this.canStart(familyID, pavilionID, projects));
+        ReactDOM.render(<Start disabled={disabled} />, document.querySelector("#start"));
     }
 
     loadData() {
         const familyID = this.state.familyID;
         const pavilionID = this.state.pavilionID;
-
-        console.log(familyID, pavilionID);
 
         if (isNaN(parseInt(familyID))) return;
         document.querySelector("#project-title").textContent = document.querySelector(`#select-family option[value='${familyID}']`).textContent;
@@ -131,14 +178,16 @@ export default class Filters extends React.Component {
 
     render() {
         return (
-            <div className="row">
-                <div className="col-lg-3 col-md-6 pb-2">
-                    <Families onChange={this.onChangeFamilyID} families={this.props.families} />
+            <form onSubmit={this.onSubmit}>
+                <div className="row">
+                    <div className="col-lg-3 col-md-6 pb-2">
+                        <Families onChange={this.onChangeFamilyID} families={this.props.families} />
+                    </div>
+                    <div className="col-lg-3 col-md-6 pb-2" id="pavilions" />
+                    <div className="col-lg-5 col-md-6 pb-2" id="all-projects" />
+                    <div className="col-lg-1  col-md-6 pb-2" id="start" />
                 </div>
-                <div className="col-lg-3 col-md-6 pb-2" id="pavilions" />
-                <div className="col-lg-5 col-md-6 pb-2" id="all-projects" />
-                <div className="col-lg-1  col-md-6 pb-2" id="start" />
-            </div>
+            </form>
         )
     }
 }
