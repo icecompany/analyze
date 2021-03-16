@@ -49,12 +49,18 @@ export default class Filters extends React.Component {
         this.setState({pavilionID: event.target.value});
     }
 
+    resetPavilionID() {
+        document.querySelector("#select-pavilion").value = '';
+        this.setState({pavilionID: ''});
+    }
+
     onChangeFamilyID(event) {
         let familyID = event.target.value;
         if (familyID !== '') {
             this.fillProjectsState(familyID, this.props.families[familyID].projects);
             ReactDOM.render(<Pavilions pavilions={this.props.families[familyID].pavilions} onChange={this.onChangePavilionID} />, document.querySelector("#pavilions"));
             ReactDOM.render(<Projects onClick={this.onCheckedProject} familyID={familyID} projects={this.props.families[familyID].projects} />, document.querySelector("#all-projects"));
+            this.resetPavilionID();
         }
         else {
             this.updateInterface('', this.state.pavilionID, this.state.projects);
