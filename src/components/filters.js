@@ -21,16 +21,22 @@ export default class Filters extends React.Component {
 
     getDataURI() {
         let url = `/administrator/index.php?option=com_janalyze&task=items.execute&familyID=${this.state.familyID}&format=json`;
-        let projectID = this.getSelectedProjects();
+        const projectID = this.getSelectedProjects();
         if (projectID.length > 0) url += projectID;
+        const pavilionID = this.getSelectedPavilion();
+        if (pavilionID.length > 0) url += pavilionID;
         return url;
+    }
+
+    getSelectedPavilion() {
+        let result = '';
+        if (this.state.pavilionID !== '') result += `&pavilionID=${this.state.pavilionID}`;
+        return result;
     }
 
     getSelectedProjects() {
         let result = '';
-        for (let project of document.querySelectorAll(`.select-project div input[type='checkbox']`)) {
-            if (project.checked) result += `&projectID[]=${project.dataset.id}`;
-        }
+        this.state.projects.map((projectID, i) => result += `&projectID[]=${projectID}`);
         return result;
     }
 
@@ -47,7 +53,7 @@ export default class Filters extends React.Component {
         let familyID = event.target.value;
         if (familyID !== '') {
             this.fillProjectsState(familyID, this.props.families[familyID].projects);
-            ReactDOM.render(<Pavilions pavilions={this.props.families[familyID].pavilions} />, document.querySelector("#pavilions"));
+            ReactDOM.render(<Pavilions pavilions={this.props.families[familyID].pavilions} onChange={this.onChangePavilionID} />, document.querySelector("#pavilions"));
             ReactDOM.render(<Projects onClick={this.onCheckedProject} familyID={familyID} projects={this.props.families[familyID].projects} />, document.querySelector("#all-projects"));
         }
         else {
@@ -108,11 +114,7 @@ export default class Filters extends React.Component {
     }
 
     loadData() {
-        const familyID = this.state.familyID;
-        const pavilionID = this.state.pavilionID;
-
-        if (isNaN(parseInt(familyID))) return;
-        document.querySelector("#project-title").textContent = document.querySelector(`#select-family option[value='${familyID}']`).textContent;
+        document.querySelector("#project-title").textContent = document.querySelector(`#select-family option[value='${this.state.familyID}']`).textContent;
         ReactDOM.render(<Spinner type="primary" text="Загружаем результаты..." />, document.querySelector("#tables"));
         const url = this.getDataURI();
         fetch(url)
@@ -139,8 +141,8 @@ export default class Filters extends React.Component {
                     <div className="col-lg-3 col-md-6 pb-2">
                         <Families onChange={this.onChangeFamilyID} families={this.props.families} />
                     </div>
-                    <div className="col-lg-3 col-md-6 pb-2" id="pavilions" />
-                    <div className="col-lg-5 col-md-6 pb-2" id="all-projects" />
+                    <div className="col-lg-2 col-md-6 pb-2" id="pavilions" />
+                    <div className="col-lg-6 col-md-6 pb-2" id="all-projects" />
                     <div className="col-lg-1  col-md-6 pb-2" id="start" />
                 </div>
             </form>
