@@ -122,7 +122,6 @@ export default class Filters extends React.Component {
     loadData() {
         document.querySelector("#project-title").textContent = document.querySelector(`#select-family option[value='${this.state.familyID}']`).textContent;
         ReactDOM.render(<Spinner type="primary" text="Загружаем результаты..." />, document.querySelector("#tables"));
-        const url = this.getDataURI();
         fetch(url)
             .then((response) => {
                 if (!response.ok) console.log(`Code: ${response.status}`);
