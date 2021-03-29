@@ -8,19 +8,22 @@ import Families from "./families";
 import Pavilions from "./pavilions";
 import Start from "./start";
 import Projects from "./projects";
+import Modes from "./modes";
 
 export default class Filters extends React.Component {
     constructor(props) {
         super(props);
         this.onChangeFamilyID = this.onChangeFamilyID.bind(this);
         this.onChangePavilionID = this.onChangePavilionID.bind(this);
+        this.onChangeMode = this.onChangeMode.bind(this);
         this.onCheckedProject = this.onCheckedProject.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
-        this.state = {familyID: '', pavilionID: '', projects: []};
+        this.state = {mode: '', familyID: '', pavilionID: '', projects: []};
     }
 
     getDataURI() {
-        let url = `/administrator/index.php?option=com_janalyze&task=items.execute&familyID=${this.state.familyID}&format=json`;
+        let task = (this.state.mode === 'squares') ? 'items': 'equipments';
+        let url = `/administrator/index.php?option=com_janalyze&task=${task}.execute&familyID=${this.state.familyID}&format=json`;
         const projectID = this.getSelectedProjects();
         if (projectID.length > 0) url += projectID;
         const pavilionID = this.getSelectedPavilion();
@@ -49,6 +52,12 @@ export default class Filters extends React.Component {
         this.setState({pavilionID: event.target.value});
     }
 
+    onChangeMode(event) {
+        let mode = event.target.value;
+        this.setState({mode: event.target.value});
+        this.updateInterface(this.state.familyID, mode, this.state.pavilionID, this.state.projects);
+    }
+
     resetPavilionID() {
         document.querySelector("#select-pavilion").value = '';
         this.setState({pavilionID: ''});
@@ -58,12 +67,13 @@ export default class Filters extends React.Component {
         let familyID = event.target.value;
         if (familyID !== '') {
             this.fillProjectsState(familyID, this.props.families[familyID].projects);
+            ReactDOM.render(<Modes onChange={this.onChangeMode} />, document.querySelector("#modes"));
             ReactDOM.render(<Pavilions pavilions={this.props.families[familyID].pavilions} onChange={this.onChangePavilionID} />, document.querySelector("#pavilions"));
             ReactDOM.render(<Projects onClick={this.onCheckedProject} familyID={familyID} projects={this.props.families[familyID].projects} />, document.querySelector("#all-projects"));
             this.resetPavilionID();
         }
         else {
-            this.updateInterface('', this.state.pavilionID, this.state.projects);
+            this.updateInterface('', this.state.mode, this.state.pavilionID, this.state.projects);
         }
         this.setState({familyID: familyID});
     }
@@ -96,7 +106,7 @@ export default class Filters extends React.Component {
         else {
             projects = this.removeProjectFromState(projectID);
         }
-        this.updateInterface(this.state.familyID, this.state.pavilionID, projects);
+        this.updateInterface(this.state.familyID, this.state.mode, this.state.pavilionID, projects);
     }
 
     fillProjectsState(familyID, projects) {
@@ -105,23 +115,24 @@ export default class Filters extends React.Component {
             if (projects[projectID].checked) arr.push(projectID);
         });
         this.setState({projects: arr});
-        this.updateInterface(familyID, this.state.pavilionID, arr);
+        this.updateInterface(familyID, this.state.mode, this.state.pavilionID, arr);
     }
 
-    canStart(familyID, pavilionID, projects) {
+    canStart(familyID, mode, pavilionID, projects) {
         let can = false;
-        if (familyID !== '' && projects.length > 0) can = true;
+        if (familyID !== '' && mode !== '' && projects.length > 0) can = true;
         return can;
     }
 
-    updateInterface(familyID, pavilionID, projects) {
-        const disabled = (!this.canStart(familyID, pavilionID, projects));
+    updateInterface(familyID, mode, pavilionID, projects) {
+        const disabled = (!this.canStart(familyID, mode, pavilionID, projects));
         ReactDOM.render(<Start disabled={disabled} />, document.querySelector("#start"));
     }
 
     loadData() {
         document.querySelector("#project-title").textContent = document.querySelector(`#select-family option[value='${this.state.familyID}']`).textContent;
         ReactDOM.render(<Spinner type="primary" text="Загружаем результаты..." />, document.querySelector("#tables"));
+        const url = this.getDataURI();
         fetch(url)
             .then((response) => {
                 if (!response.ok) console.log(`Code: ${response.status}`);
@@ -143,11 +154,12 @@ export default class Filters extends React.Component {
         return (
             <form onSubmit={this.onSubmit}>
                 <div className="row">
-                    <div className="col-lg-3 col-md-6 pb-2">
+                    <div className="col-lg-2 col-md-4 pb-2">
                         <Families onChange={this.onChangeFamilyID} families={this.props.families} />
                     </div>
+                    <div className="col-lg-2 col-md-2 pb-2" id="modes" />
                     <div className="col-lg-2 col-md-6 pb-2" id="pavilions" />
-                    <div className="col-lg-6 col-md-6 pb-2" id="all-projects" />
+                    <div className="col-lg-5 col-md-6 pb-2" id="all-projects" />
                     <div className="col-lg-1  col-md-6 pb-2" id="start" />
                 </div>
             </form>

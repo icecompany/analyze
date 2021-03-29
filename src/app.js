@@ -17,7 +17,7 @@ class App extends React.Component {
             connected: false,
             url: {
                 families: `/administrator/index.php?option=com_janalyze&task=summary.execute&format=json`,
-                data: `/administrator/index.php?option=com_janalyze&task=items.execute&format=json`
+                data: `/administrator/index.php?option=com_janalyze&task=equipments.execute&format=json`
             },
 
         }
