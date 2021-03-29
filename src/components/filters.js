@@ -142,8 +142,8 @@ export default class Filters extends React.Component {
             })
             .then((response) => {
                 let data = response.data;
-                ReactDOM.render(<Global_heads projects={data.projects} />, document.querySelector("#global_heads"));
-                ReactDOM.render(<Places structure={data.structure} type="places" id="general" data={data} />, document.querySelector("#tables"));
+                ReactDOM.render(<Global_heads mode={this.state.mode} projects={data.projects} />, document.querySelector("#global_heads"));
+                ReactDOM.render(<Places mode={this.state.mode} structure={data.structure} type="places" id="general" data={data} />, document.querySelector("#tables"));
                 ReactDOM.render(<Courses projects={data.projects} />, document.querySelector("#courses"));
             }, (error) => {
                 console.log(`Получена ошибка: ${error}.`);

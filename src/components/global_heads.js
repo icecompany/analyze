@@ -11,16 +11,20 @@ export default class Global_heads extends React.Component {
         return (i > 0) ? 'full' : 'short';
     }
 
+    getHeadSqm() {
+        return (this.props.mode === 'squares') ? 'Кв. м.' : 'Шт.'
+    }
+
     getColumns() {
         return {
             full: {
-                square: 'Кв. м.',
+                square: this.getHeadSqm(),
                 money: 'Руб.',
                 percent_square: 'Динамика кв. м.',
                 percent_money: 'Динамика руб.'
             },
             short: {
-                square: 'Кв. м.',
+                square: this.getHeadSqm(),
                 money: 'Руб.'
             }
         }

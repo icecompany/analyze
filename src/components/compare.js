@@ -18,6 +18,10 @@ export default class Compare extends React.Component {
         this.state = {table_id: `table-${this.props.place}_${this.props.finance_type}_${this.props.square_type}`}
     }
 
+    getHeadSqm() {
+        return (this.props.mode === 'squares') ? 'кв. м.' : 'шт.'
+    }
+
     getTitleKey(i) {
         return (i > 0) ? 'full' : 'short';
     }
@@ -25,14 +29,14 @@ export default class Compare extends React.Component {
     getColumns() {
         return {
             full: {
-                square: 'Кв. м.',
+                square: this.getHeadSqm(),
                 money: 'Руб.',
-                percent_square: 'Динамика кв. м.',
+                percent_square: `Динамика ${this.getHeadSqm()}`,
                 percent_money: 'Динамика руб.'
             },
             short: {
-                square: 'Кв. м.',
-                money: 'Руб.'
+                square: this.getHeadSqm(),
+                money: 'руб.'
             }
         }
     }
@@ -86,9 +90,16 @@ export default class Compare extends React.Component {
 
     getCompanyURL(companyID, title) {
         const url = encodeURI(`/administrator/index.php?option=com_companies&task=company.edit&id=${companyID}`);
-        return (
-            <a href={url} target="_blank" title="Открыть компанию в CRM">{title}</a>
-        );
+        if (this.props.mode === 'squares') {
+            return (
+                <a href={url} target="_blank" title="Открыть компанию в CRM">{title}</a>
+            );
+        }
+        else {
+            return (
+                title
+            );
+        }
     }
 
     getData() {
@@ -107,7 +118,7 @@ export default class Compare extends React.Component {
                                     let data_sort = data[companyID][projectID][this.props.place][this.props.finance_type][this.props.square_type][column];
                                     switch (column) {
                                         case 'square': {
-                                            value = `${Math.round(data_sort)} кв. м.`;
+                                            value = `${Math.round(data_sort)} ${this.getHeadSqm()}`;
                                             break;
                                         }
                                         case 'money': {
