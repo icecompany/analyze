@@ -77,11 +77,13 @@ export default class Compare extends React.Component {
         return (
             <thead>
             <tr>
+                <th>&nbsp;</th>
                 <th width="20%">&nbsp;</th>
                 {projects}
             </tr>
             <tr>
-                <th width="20%" data-sort-default={true} style={{cursor: 'pointer'}}>Компания</th>
+                <th width="1%" data-sort-default="" style={{cursor: 'pointer'}}>№п/п</th>
+                <th width="20%" style={{cursor: 'pointer'}}>Компания</th>
                 {params}
             </tr>
             </thead>
@@ -103,13 +105,16 @@ export default class Compare extends React.Component {
     }
 
     getData() {
+        let sc = 0;
         return (
             Object.keys(this.props.companies).map((companyID, i) => {
                 let total = this.props.total.by_companies[companyID];
                 if ((total[this.props.place][this.props.finance_type][this.props.square_type]['square'] !== 0 && total[this.props.place][this.props.finance_type][this.props.square_type]['money'] !== 0) ||
                     (total[this.props.place][this.props.finance_type][this.props.square_type]['square'] !== 0 && total[this.props.place][this.props.finance_type][this.props.square_type]['money'] === 0)) {
+                    sc++;
                     return (
                         <tr key={companyID}>
+                            <td>{sc}</td>
                             <td data-sort={this.props.companies[companyID]}>{this.getCompanyURL(companyID, this.props.companies[companyID])}</td>
                             {Object.keys(this.props.projects).map((projectID, j) => {
                                 let data = this.props.data;
