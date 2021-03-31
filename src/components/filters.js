@@ -6,7 +6,7 @@ import Places from "./places";
 import Courses from "./courses";
 import Families from "./families";
 import Pavilions from "./pavilions";
-import Start from "./start";
+import Start from "./start.jsx";
 import Projects from "./projects";
 import Modes from "./modes";
 
