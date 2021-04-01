@@ -17,8 +17,9 @@ export default class Filters extends React.Component {
         this.onChangePavilionID = this.onChangePavilionID.bind(this);
         this.onChangeMode = this.onChangeMode.bind(this);
         this.onCheckedProject = this.onCheckedProject.bind(this);
+        this.onChangeEquipmentID = this.onChangeEquipmentID.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
-        this.state = {mode: '', familyID: '', pavilionID: '', projects: []};
+        this.state = {mode: '', familyID: '', pavilionID: '', equipmentID: '', projects: []};
     }
 
     getDataURI() {
@@ -52,17 +53,22 @@ export default class Filters extends React.Component {
         this.setState({pavilionID: event.target.value});
     }
 
+    onChangeEquipmentID(event) {
+        this.setState({equipmentID: event.target.value});
+    }
+
     onChangeMode(event) {
         let mode = event.target.value;
         this.setState({mode: event.target.value});
         switch (mode) {
-            case 'squares':
-            case 'equipments': {
-                ReactDOM.render(<Pavilions pavilions={this.props.families[this.state.familyID].pavilions} onMount={this.resetPavilionID} onChange={this.onChangePavilionID} />, document.querySelector("#pavilions"));
+            case 'squares': {
+                ReactDOM.render(<Pavilions pavilions={this.props.families[this.state.familyID].pavilions} onChange={this.onChangePavilionID} />, document.querySelector("#pavilions"));
                 break;
             }
             default: {
-                document.querySelector("#pavilions").innerHTML = "";
+                this.setState({pavilionID: ''});
+                ReactDOM.unmountComponentAtNode(document.querySelector("#pavilions"));
+                break;
             }
         }
         this.updateInterface(this.state.familyID, mode, this.state.pavilionID, this.state.projects);
@@ -98,6 +104,8 @@ export default class Filters extends React.Component {
     onChangeFamilyID(event) {
         let familyID = event.target.value;
         if (familyID !== '') {
+            ReactDOM.unmountComponentAtNode(document.querySelector("#modes"));
+            ReactDOM.unmountComponentAtNode(document.querySelector("#all-projects"));
             this.fillProjectsState(familyID, this.props.families[familyID].projects);
             ReactDOM.render(<Modes onChange={this.onChangeMode} />, document.querySelector("#modes"));
             ReactDOM.render(<Projects onClick={this.onCheckedProject} familyID={familyID} projects={this.props.families[familyID].projects} />, document.querySelector("#all-projects"));
