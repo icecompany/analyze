@@ -7,7 +7,7 @@ export default class Modes extends React.Component {
 
     render() {
         return (
-            <select className="form-select" onChange={this.props.onChange}>
+            <select className="form-select" id={`modes`} onChange={this.props.onChange}>
                 <option value="">- Режим -</option>
                 <option value="squares">Площади</option>
                 <option value="equipments">Оборудование и услуги</option>

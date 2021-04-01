@@ -55,12 +55,44 @@ export default class Filters extends React.Component {
     onChangeMode(event) {
         let mode = event.target.value;
         this.setState({mode: event.target.value});
+        switch (mode) {
+            case 'squares':
+            case 'equipments': {
+                ReactDOM.render(<Pavilions pavilions={this.props.families[this.state.familyID].pavilions} onMount={this.resetPavilionID} onChange={this.onChangePavilionID} />, document.querySelector("#pavilions"));
+                break;
+            }
+            default: {
+                document.querySelector("#pavilions").innerHTML = "";
+            }
+        }
         this.updateInterface(this.state.familyID, mode, this.state.pavilionID, this.state.projects);
     }
 
+    resetMode() {
+        try {
+            let field = document.querySelector("#modes");
+            if (field !== undefined) field.value = '';
+        }
+        catch (e) {
+
+        }
+        finally {
+            this.resetPavilionID();
+        }
+        this.setState({mode: ''});
+    }
+
     resetPavilionID() {
-        document.querySelector("#select-pavilion").value = '';
-        this.setState({pavilionID: ''});
+        try {
+            let field = document.querySelector("#select-pavilion");
+            if (field !== undefined) field.value = '';
+        }
+        catch (e) {
+
+        }
+        finally {
+            this.setState({pavilionID: ''});
+        }
     }
 
     onChangeFamilyID(event) {
@@ -68,9 +100,8 @@ export default class Filters extends React.Component {
         if (familyID !== '') {
             this.fillProjectsState(familyID, this.props.families[familyID].projects);
             ReactDOM.render(<Modes onChange={this.onChangeMode} />, document.querySelector("#modes"));
-            ReactDOM.render(<Pavilions pavilions={this.props.families[familyID].pavilions} onChange={this.onChangePavilionID} />, document.querySelector("#pavilions"));
             ReactDOM.render(<Projects onClick={this.onCheckedProject} familyID={familyID} projects={this.props.families[familyID].projects} />, document.querySelector("#all-projects"));
-            this.resetPavilionID();
+            this.resetMode();
         }
         else {
             this.updateInterface('', this.state.mode, this.state.pavilionID, this.state.projects);
