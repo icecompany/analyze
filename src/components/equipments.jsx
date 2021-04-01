@@ -7,8 +7,8 @@ export default class Equipments extends React.Component {
 
     render() {
         return (
-            <select className="form-select" id="select-equipment" onChange={this.props.onChange} defaultValue="">
-                <option value="">- Все павильоны -</option>
+            <select className="form-select" id="select-equipment" onChange={this.props.onChange} defaultValue="" style={{width: '100%', maxWidth: '95%'}}>
+                <option value="">- Все услуги -</option>
                 {Object.keys(this.props.equipments).map((equipmentID, i) => {
                     return (<option value={equipmentID} key={equipmentID}>{this.props.equipments[equipmentID].title}</option> )
                 })}

@@ -9,6 +9,7 @@ import Pavilions from "./pavilions";
 import Start from "./start.jsx";
 import Projects from "./projects";
 import Modes from "./modes";
+import Equipments from "./equipments.jsx";
 
 export default class Filters extends React.Component {
     constructor(props) {
@@ -62,7 +63,13 @@ export default class Filters extends React.Component {
         this.setState({mode: event.target.value});
         switch (mode) {
             case 'squares': {
+                this.setState({equipmentID: ''});
                 ReactDOM.render(<Pavilions pavilions={this.props.families[this.state.familyID].pavilions} onChange={this.onChangePavilionID} />, document.querySelector("#pavilions"));
+                break;
+            }
+            case 'equipments': {
+                this.setState({pavilionID: ''});
+                this.loadEquipments();
                 break;
             }
             default: {
@@ -72,6 +79,20 @@ export default class Filters extends React.Component {
             }
         }
         this.updateInterface(this.state.familyID, mode, this.state.pavilionID, this.state.projects);
+    }
+
+    loadEquipments() {
+        let url = `/administrator/index.php?option=com_prices&task=equipments.execute&format=json`;
+        fetch(url)
+            .then((response) => {
+                return response.json();
+            }, (error) => {
+                console.log(`Ошибка получения списка оборудования: ${error}`);
+            })
+            .then((data) => {
+                data = data.data;
+                ReactDOM.render(<Equipments equipments={data} onChange={this.onChangeEquipmentID} />, document.querySelector("#pavilions"));
+            })
     }
 
     resetMode() {

@@ -16,6 +16,7 @@ export default class Compare extends React.Component {
     constructor(props) {
         super(props);
         this.state = {table_id: `table-${this.props.place}_${this.props.finance_type}_${this.props.square_type}`}
+        this.getEquipmentLink = this.getEquipmentLink.bind(this);
     }
 
     getHeadSqm() {
@@ -97,11 +98,21 @@ export default class Compare extends React.Component {
                 <a href={url} target="_blank" title="Открыть компанию в CRM">{title}</a>
             );
         }
+        else if (this.props.mode === 'equipments') {
+            return (
+                <a href="#" data-equipment={companyID} onClick={this.getEquipmentLink}>{title}</a>
+            )
+        }
         else {
             return (
                 title
             );
         }
+    }
+
+    getEquipmentLink(event) {
+        event.preventDefault();
+        console.log(event.target.dataset.equipment);
     }
 
     getData() {
