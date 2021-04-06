@@ -11,7 +11,6 @@ export default class Modes extends React.Component {
                 <option value="">- Режим -</option>
                 <option value="squares">Площади</option>
                 <option value="equipments">Оборудование и услуги</option>
-                <option value="equipment">Один пункт</option>
             </select>
         )
     }

@@ -11,6 +11,7 @@ import Projects from "./projects";
 import Modes from "./modes";
 import Equipments from "./equipments.jsx";
 import Modal from "./modal.jsx";
+import Compare from "./compare";
 
 export default class Filters extends React.Component {
     constructor(props) {
@@ -19,7 +20,6 @@ export default class Filters extends React.Component {
         this.onChangePavilionID = this.onChangePavilionID.bind(this);
         this.onChangeMode = this.onChangeMode.bind(this);
         this.onCheckedProject = this.onCheckedProject.bind(this);
-        this.onChangeEquipmentID = this.onChangeEquipmentID.bind(this);
         this.onClickEquipment = this.onClickEquipment.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
         this.state = {mode: '', familyID: '', pavilionID: '', equipmentID: '', projects: []};
@@ -28,11 +28,6 @@ export default class Filters extends React.Component {
     getDataURI() {
         let task = (this.state.mode === 'squares') ? 'items': 'equipments';
         let url = `/administrator/index.php?option=com_janalyze&task=${task}.execute&familyID=${this.state.familyID}&format=json`;
-        return this.addFiltersToURI(url);
-    }
-
-    getEquipmentsURI() {
-        let url = `/administrator/index.php?option=com_prices&task=equipments.execute&format=json`;
         return this.addFiltersToURI(url);
     }
 
@@ -70,12 +65,13 @@ export default class Filters extends React.Component {
 
     onClickEquipment(event) {
         event.preventDefault();
+        this.setState({equipmentID: event.target.value});
         let equipmentID = event.target.dataset.equipment;
         let finance_type = event.target.dataset.finance;
         let sponsor = event.target.dataset.sponsor;
-        this.setState({equipmentID: event.target.value});
+        let company = event.target.dataset.company;
         const url = this.getEquipmentURI(equipmentID, finance_type, sponsor);
-        console.log(url);
+        this.loadEquipmentCompare(url, company);
     }
 
     onChangePavilionID(event) {
@@ -97,7 +93,6 @@ export default class Filters extends React.Component {
             }
             case 'equipments': {
                 this.setState({pavilionID: ''});
-                this.loadEquipments();
                 break;
             }
             default: {
@@ -109,8 +104,7 @@ export default class Filters extends React.Component {
         this.updateInterface(this.state.familyID, mode, this.state.pavilionID, this.state.projects);
     }
 
-    loadEquipments() {
-        let url = this.getEquipmentsURI();
+    loadEquipmentCompare(url, company) {
         fetch(url)
             .then((response) => {
                 return response.json();
@@ -119,7 +113,11 @@ export default class Filters extends React.Component {
             })
             .then((data) => {
                 data = data.data;
-                ReactDOM.render(<Equipments equipments={data} onChange={this.onChangeEquipmentID} />, document.querySelector("#pavilions"));
+                return <Compare mode="equipment" projects={data.projects} companies={data.companies} data={data.data} total={data.total} />;
+            })
+            .then((data) => {
+                ReactDOM.unmountComponentAtNode(document.querySelector("#div-equipment"));
+                ReactDOM.render(<Modal id="modal-equipment" title={company} data={data} />, document.querySelector("#div-equipment"));
             })
     }
 
@@ -233,7 +231,6 @@ export default class Filters extends React.Component {
                 ReactDOM.render(<Global_heads mode={this.state.mode} projects={data.projects} />, document.querySelector("#global_heads"));
                 ReactDOM.render(<Places mode={this.state.mode} structure={data.structure} type="places" id="general" data={data} onClickEquipment={this.onClickEquipment} />, document.querySelector("#tables"));
                 ReactDOM.render(<Courses projects={data.projects} />, document.querySelector("#courses"));
-                ReactDOM.render(<Modal id="modal-equipment" title="Test modal" />, document.querySelector("#div-equipment"));
             }, (error) => {
                 console.log(`Получена ошибка: ${error}.`);
             });

@@ -17,16 +17,23 @@ export default class Modal extends React.Component {
 
     getBody() {
         return (
-            <div className="modal-body" id="modal-body">
-                <Spinner type="primary" text="Загружаем..." />
+            <div className="modal-body">
+                {this.props.data}
             </div>
         )
+    }
+
+    componentDidMount() {
+        let modal = new bootstrap.Modal(document.querySelector(`#${this.props.id}`), {
+            keyboard: false
+        });
+        modal.show();
     }
 
     render() {
         return (
             <div className="modal fade" id={this.props.id} tabIndex="-1" aria-hidden="true">
-                <div className="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+                <div className="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-fullscreen">
                     <div className="modal-content">
                         {this.getHead()}
                         {this.getBody()}

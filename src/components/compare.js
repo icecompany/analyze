@@ -54,25 +54,33 @@ export default class Compare extends React.Component {
             return Object.keys(columns[key]).map((param, j) => {
                 let total = 0;
                 let sort_method = 'none;'
+                let value = "";
+                if (this.props.mode === 'equipment') {
+                    value = this.props.total[projectID][param];
+                }
+                else {
+                    value = this.props.total.by_squares[projectID][this.props.place][this.props.finance_type][this.props.square_type][param];
+                }
                 switch(param) {
                     case 'square': {
-                        total = Math.round(this.props.total.by_squares[projectID][this.props.place][this.props.finance_type][this.props.square_type][param]);
+                        total = Math.round(value);
                         sort_method = 'number';
                         break;
                     }
                     case 'money': {
-                        total = formatter.format(this.props.total.by_squares[projectID][this.props.place][this.props.finance_type][this.props.square_type][param]);
+                        total = formatter.format(value);
                         sort_method = 'number';
                         break;
                     }
                     default: {
-                        total = this.props.total.by_squares[projectID][this.props.place][this.props.finance_type][this.props.square_type][param] + "%";
+                        total = value + "%";
                         sort_method = 'number';
                     }
                 }
                 return (<th style={{cursor: 'pointer'}} data-sort-method={sort_method} key={j} width={`${column_width}%`}>{total} {columns[key][param]}</th>)
             })
         });
+        let head_title = (this.props.mode === 'equipments') ? 'Пункт прайса' : 'Компания';
         return (
             <thead>
             <tr>
@@ -82,7 +90,7 @@ export default class Compare extends React.Component {
             </tr>
             <tr>
                 <th width="1%" data-sort-default="" style={{cursor: 'pointer'}}>№п/п</th>
-                <th width="20%" style={{cursor: 'pointer'}}>Компания</th>
+                <th width="20%" style={{cursor: 'pointer'}}>{head_title}</th>
                 {params}
             </tr>
             </thead>
@@ -91,14 +99,14 @@ export default class Compare extends React.Component {
 
     getCompanyURL(companyID, title) {
         const url = encodeURI(`/administrator/index.php?option=com_companies&task=company.edit&id=${companyID}`);
-        if (this.props.mode === 'squares') {
+        if (this.props.mode === 'squares' || this.props.mode === 'equipment') {
             return (
                 <a href={url} target="_blank" title="Открыть компанию в CRM">{title}</a>
             );
         }
         else if (this.props.mode === 'equipments') {
             return (
-                <a href="#" data-bs-toggle="modal" data-bs-target="#modal-equipment" data-equipment={companyID} data-finance={this.props.finance_type} data-sponsor={this.props.square_type} onClick={this.props.onClickEquipment}>{title}</a>
+                <a href="#" data-equipment={companyID} data-company={title} data-finance={this.props.finance_type} data-sponsor={this.props.square_type} onClick={this.props.onClickEquipment}>{title}</a>
             )
         }
         else {
@@ -112,9 +120,9 @@ export default class Compare extends React.Component {
         let sc = 0;
         return (
             Object.keys(this.props.companies).map((companyID, i) => {
-                let total = this.props.total.by_companies[companyID];
-                if ((total[this.props.place][this.props.finance_type][this.props.square_type]['square'] !== 0 && total[this.props.place][this.props.finance_type][this.props.square_type]['money'] !== 0) ||
-                    (total[this.props.place][this.props.finance_type][this.props.square_type]['square'] !== 0 && total[this.props.place][this.props.finance_type][this.props.square_type]['money'] === 0)) {
+                let total = (this.props.mode === 'equipment') ? 0 : this.props.total.by_companies[companyID];
+                if (this.props.mode === 'equipment' || (this.props.mode !== 'equipment' && ((total[this.props.place][this.props.finance_type][this.props.square_type]['square'] !== 0 && total[this.props.place][this.props.finance_type][this.props.square_type]['money'] !== 0) ||
+                    (total[this.props.place][this.props.finance_type][this.props.square_type]['square'] !== 0 && total[this.props.place][this.props.finance_type][this.props.square_type]['money'] === 0)))) {
                     sc++;
                     return (
                         <tr key={companyID}>
@@ -122,9 +130,10 @@ export default class Compare extends React.Component {
                             <td data-sort={this.props.companies[companyID]}>{this.getCompanyURL(companyID, this.props.companies[companyID])}</td>
                             {Object.keys(this.props.projects).map((projectID, j) => {
                                 let data = this.props.data;
-                                return Object.keys(data[companyID][projectID][this.props.place][this.props.finance_type][this.props.square_type]).map((column, c) => {
+                                let items = (this.props.mode === 'equipment') ? data[companyID][projectID] : data[companyID][projectID][this.props.place][this.props.finance_type][this.props.square_type];
+                                return Object.keys(items).map((column, c) => {
                                     let value = 0;
-                                    let data_sort = data[companyID][projectID][this.props.place][this.props.finance_type][this.props.square_type][column];
+                                    let data_sort = items[column];
                                     switch (column) {
                                         case 'square': {
                                             value = `${Math.round(data_sort)} ${this.getHeadSqm()}`;
