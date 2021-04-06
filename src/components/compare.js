@@ -167,8 +167,9 @@ export default class Compare extends React.Component {
     render() {
         const heads = this.getHeads()
         const data = this.getData()
+        let class_name = (this.props.mode === 'equipment') ? 'table table-bordered table-striped' : 'table table-bordered';
         return (
-            <table className="table table-bordered" id={this.state.table_id}>
+            <table className={class_name} id={this.state.table_id}>
                 {heads}
                 <tbody>{data}</tbody>
             </table>
