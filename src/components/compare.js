@@ -1,7 +1,6 @@
 'use strict';
 
 import React from "react";
-
 window.Tablesort = require('tablesort');
 window.bootstrap = require('bootstrap');
 require('tablesort/src/sorts/tablesort.number');
@@ -16,7 +15,6 @@ export default class Compare extends React.Component {
     constructor(props) {
         super(props);
         this.state = {table_id: `table-${this.props.place}_${this.props.finance_type}_${this.props.square_type}`}
-        this.getEquipmentLink = this.getEquipmentLink.bind(this);
     }
 
     getHeadSqm() {
@@ -100,7 +98,7 @@ export default class Compare extends React.Component {
         }
         else if (this.props.mode === 'equipments') {
             return (
-                <a href="#" data-equipment={companyID} onClick={this.getEquipmentLink}>{title}</a>
+                <a href="#" data-bs-toggle="modal" data-bs-target="#modal-equipment" data-equipment={companyID} data-finance={this.props.finance_type} data-sponsor={this.props.square_type} onClick={this.props.onClickEquipment}>{title}</a>
             )
         }
         else {
@@ -108,11 +106,6 @@ export default class Compare extends React.Component {
                 title
             );
         }
-    }
-
-    getEquipmentLink(event) {
-        event.preventDefault();
-        console.log(event.target.dataset.equipment);
     }
 
     getData() {

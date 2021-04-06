@@ -41,15 +41,15 @@ class Place extends React.Component {
         let result = '';
         //Шаг 2. Рендерим аккордеон для каждого типа места
         if (this.props.type === 'finance_types') {
-            result = <Places mode={this.props.mode} structure={this.props.structure} type="finance_types" place={this.props.place} id={`accordion-${this.props.place}`} data={this.props.data} />;
+            result = <Places mode={this.props.mode} structure={this.props.structure} type="finance_types" place={this.props.place} id={`accordion-${this.props.place}`} data={this.props.data} onClickEquipment={this.props.onClickEquipment} />;
         }
         //Шаг 4. Рендерим аккордеон для каждого типа площади
         if (this.props.type === 'square_types') {
-            result = <Places mode={this.props.mode} structure={this.props.structure} type="square_types" place={this.props.place} finance_type={this.props.finance_type} id={`accordion-${this.props.place}_${this.props.finance_type}`} data={this.props.data} />;
+            result = <Places mode={this.props.mode} structure={this.props.structure} type="square_types" place={this.props.place} finance_type={this.props.finance_type} id={`accordion-${this.props.place}_${this.props.finance_type}`} data={this.props.data} onClickEquipment={this.props.onClickEquipment} />;
         }
         //Шаг 6. Рендерим таблицу с данными
         if (this.props.type === 'square_type') {
-            result = (<Compare mode={this.props.mode} projects={this.props.data.projects} companies={this.props.data.companies} data={this.props.data.data} total={this.props.data.total} place={this.props.place} finance_type={this.props.finance_type} square_type={this.props.square_type} />)
+            result = (<Compare mode={this.props.mode} projects={this.props.data.projects} companies={this.props.data.companies} data={this.props.data.data} total={this.props.data.total} place={this.props.place} finance_type={this.props.finance_type} square_type={this.props.square_type} onClickEquipment={this.props.onClickEquipment} />)
         }
         return result;
     }
@@ -129,19 +129,19 @@ export default class Places extends React.Component {
         //Шаг 1. Рендерим 3 места: павильон, улица и 2 этаж
         if (this.props.type === 'places') {
             result = Object.keys(this.props.structure).map((place, i) => {
-                return (<Place mode={this.props.mode} id={place} type="finance_types" structure={this.props.structure[place]} data={this.props.data} place={place} key={i} title={this.props.data.places[place]} accordion={this.props.id} />);
+                return (<Place mode={this.props.mode} id={place} type="finance_types" structure={this.props.structure[place]} data={this.props.data} place={place} key={i} title={this.props.data.places[place]} accordion={this.props.id} onClickEquipment={this.props.onClickEquipment} />);
             });
         }
         //Шаг 3. Рендерим Каждый элемент аккордеона с типом коммерции (коммерческий и нет) для тех мест, где это нужно
         if (this.props.type === 'finance_types') {
             result = Object.keys(this.props.structure).map((finance_type, i) => {
-                return (<Place mode={this.props.mode} id={`${this.props.place}_${finance_type}`} type="square_types" structure={this.props.structure[finance_type]} data={this.props.data} place={this.props.place} finance_type={finance_type} title={this.props.data.finance_types[finance_type]} accordion={this.props.id} key={i} />);
+                return (<Place mode={this.props.mode} id={`${this.props.place}_${finance_type}`} type="square_types" structure={this.props.structure[finance_type]} data={this.props.data} place={this.props.place} finance_type={finance_type} title={this.props.data.finance_types[finance_type]} accordion={this.props.id} key={i} onClickEquipment={this.props.onClickEquipment} />);
             });
         }
         //Шаг 5. Рендерим Каждый элемент аккордеона с каждым типом площади
         if (this.props.type === 'square_types' && this.props.structure !== undefined) {
             result = this.props.structure.map((square_type, i) => {
-                return (<Place mode={this.props.mode} id={`${this.props.place}_${this.props.finance_type}_${square_type}`} type="square_type" data={this.props.data} square_type={square_type} place={this.props.place} finance_type={this.props.finance_type} title={this.props.data.square_types[square_type]} accordion={this.props.id} key={i} />);
+                return (<Place mode={this.props.mode} id={`${this.props.place}_${this.props.finance_type}_${square_type}`} type="square_type" data={this.props.data} square_type={square_type} place={this.props.place} finance_type={this.props.finance_type} title={this.props.data.square_types[square_type]} accordion={this.props.id} key={i} onClickEquipment={this.props.onClickEquipment} />);
             });
         }
         return result;

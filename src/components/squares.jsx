@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import Auth from "./auth";
 import Filters from "./filters";
 import Spinner from "./spinner";
+import Modal from "./modal.jsx";
 
 export default class Squares extends React.Component {
     constructor(props) {
@@ -58,6 +59,8 @@ export default class Squares extends React.Component {
                 <br/>
                 <div className="container-fluid" id="global_heads" />
                 <div className="container-fluid" id="tables" />
+                <br/>
+                <div className="container-fluid" id="div-equipment" />
             </div>
         )
     }

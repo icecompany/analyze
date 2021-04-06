@@ -1,4 +1,5 @@
 import React from "react";
+import Spinner from "./spinner";
 
 export default class Modal extends React.Component {
     constructor(props) {
@@ -9,23 +10,23 @@ export default class Modal extends React.Component {
         return (
             <div className="modal-header">
                 <h5 className="modal-title" id="modal-title">{this.props.title}</h5>
-                <button type="button" className="btn-close" data-bs-dismiss="modal">Закрыть</button>
+                <button type="button" className="btn-close" data-bs-dismiss="modal" />
             </div>
         )
     }
 
     getBody() {
         return (
-            <div className="modal-body">
-                Content
+            <div className="modal-body" id="modal-body">
+                <Spinner type="primary" text="Загружаем..." />
             </div>
         )
     }
 
     render() {
         return (
-            <div className="modal fade modal-dialog-scrollable modal-dialog-centered" id={this.props.id}>
-                <div className="modal-dialog">
+            <div className="modal fade" id={this.props.id} tabIndex="-1" aria-hidden="true">
+                <div className="modal-dialog modal-dialog-scrollable modal-dialog-centered">
                     <div className="modal-content">
                         {this.getHead()}
                         {this.getBody()}

@@ -10,6 +10,7 @@ import Start from "./start.jsx";
 import Projects from "./projects";
 import Modes from "./modes";
 import Equipments from "./equipments.jsx";
+import Modal from "./modal.jsx";
 
 export default class Filters extends React.Component {
     constructor(props) {
@@ -19,6 +20,7 @@ export default class Filters extends React.Component {
         this.onChangeMode = this.onChangeMode.bind(this);
         this.onCheckedProject = this.onCheckedProject.bind(this);
         this.onChangeEquipmentID = this.onChangeEquipmentID.bind(this);
+        this.onClickEquipment = this.onClickEquipment.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
         this.state = {mode: '', familyID: '', pavilionID: '', equipmentID: '', projects: []};
     }
@@ -26,6 +28,22 @@ export default class Filters extends React.Component {
     getDataURI() {
         let task = (this.state.mode === 'squares') ? 'items': 'equipments';
         let url = `/administrator/index.php?option=com_janalyze&task=${task}.execute&familyID=${this.state.familyID}&format=json`;
+        return this.addFiltersToURI(url);
+    }
+
+    getEquipmentsURI() {
+        let url = `/administrator/index.php?option=com_prices&task=equipments.execute&format=json`;
+        return this.addFiltersToURI(url);
+    }
+
+    getEquipmentURI(equipmentID, finance_type, sponsor) {
+        let url = `/administrator/index.php?option=com_janalyze&task=equipment.execute&format=json&equipmentID=${equipmentID}&familyID=${this.state.familyID}`;
+        if (sponsor === 'sponsor') finance_type = 'sponsor';
+        url += `&finance_type=${finance_type}`;
+        return this.addFiltersToURI(url);
+    }
+
+    addFiltersToURI(url) {
         const projectID = this.getSelectedProjects();
         if (projectID.length > 0) url += projectID;
         const pavilionID = this.getSelectedPavilion();
@@ -48,6 +66,16 @@ export default class Filters extends React.Component {
     onSubmit(event) {
         event.preventDefault();
         this.loadData();
+    }
+
+    onClickEquipment(event) {
+        event.preventDefault();
+        let equipmentID = event.target.dataset.equipment;
+        let finance_type = event.target.dataset.finance;
+        let sponsor = event.target.dataset.sponsor;
+        this.setState({equipmentID: event.target.value});
+        const url = this.getEquipmentURI(equipmentID, finance_type, sponsor);
+        console.log(url);
     }
 
     onChangePavilionID(event) {
@@ -82,7 +110,7 @@ export default class Filters extends React.Component {
     }
 
     loadEquipments() {
-        let url = `/administrator/index.php?option=com_prices&task=equipments.execute&format=json`;
+        let url = this.getEquipmentsURI();
         fetch(url)
             .then((response) => {
                 return response.json();
@@ -203,8 +231,9 @@ export default class Filters extends React.Component {
             .then((response) => {
                 let data = response.data;
                 ReactDOM.render(<Global_heads mode={this.state.mode} projects={data.projects} />, document.querySelector("#global_heads"));
-                ReactDOM.render(<Places mode={this.state.mode} structure={data.structure} type="places" id="general" data={data} />, document.querySelector("#tables"));
+                ReactDOM.render(<Places mode={this.state.mode} structure={data.structure} type="places" id="general" data={data} onClickEquipment={this.onClickEquipment} />, document.querySelector("#tables"));
                 ReactDOM.render(<Courses projects={data.projects} />, document.querySelector("#courses"));
+                ReactDOM.render(<Modal id="modal-equipment" title="Test modal" />, document.querySelector("#div-equipment"));
             }, (error) => {
                 console.log(`Получена ошибка: ${error}.`);
             });
